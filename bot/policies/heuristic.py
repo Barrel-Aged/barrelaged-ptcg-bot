@@ -1,55 +1,55 @@
-"""HeuristicPolicy (Phase 1) — rule-based play grounded in the heuristics knowledge base.
+"""HeuristicPolicy (Phase 1) — an INTERPRETER of the heuristics knowledge base.
 
-Maps each `SelectContext` to logic derived from `heuristics_beginner.json`'s executable
-`turn_policy`/`opening_policy` + the prize-trade heuristics (H-31..H-39). MAIN is handled by scoring
-each legal option so that setup actions resolve before attacks (turn_policy order), then attacking.
-Unhandled contexts fall through to the always-legal default. Never raises; never returns illegal.
+It executes `heuristics_beginner.json`'s `turn_policy` (9 ordered steps, each tagged with B-rules)
+and `opening_policy` directly: at each MAIN decision it walks the steps IN FILE ORDER and takes the
+first one whose action is legally available — so the JSON *is* the strategy and editing it changes
+play. Each step is mapped to engine options by the B-rule IDs it carries (the code is the
+interpreter; the order/intent/rules live in the file). Prize-trade targeting follows B-15 / H-31..H-39.
 
-This is a general v1 (works across decks via card data, not deck-specific hardcoding). Tune the
-SCORE_* constants from gauntlet results.
+Never raises; never returns an illegal selection (falls back to the always-legal default).
 """
 from __future__ import annotations
 
-from cg.api import (CardType, OptionType, SelectContext, all_attack, all_card_data,
-                    to_observation_class)
+from cg.api import (AreaType, CardType, OptionType, SelectContext, all_attack,
+                    all_card_data, to_observation_class)
 
+from bot import knowledge
 from bot.engine_io import safe_selection
 from bot.policies.base import Policy
 
-# MAIN option base priorities (turn_policy order: abilities/draw/search/evolve before attaching,
-# attaching before attacking, attacking before ending). Tunable.
-PRItem = {
-    OptionType.ABILITY: 80,   # draw/search abilities first (after we can see our hand)
-    OptionType.EVOLVE: 70,    # advance toward the main attacker
-    OptionType.PLAY: 60,      # supporters/items (refined below by card type)
-    OptionType.ATTACH: 45,    # energy onto an attacker
-    OptionType.ATTACK: 25,    # after setup is exhausted (boosted by damage below)
-    OptionType.END: 2,        # end the turn rather than make a negative-value play
-    OptionType.DISCARD: 1,    # don't volunteer to discard our own resources
-    OptionType.RETREAT: 0,    # don't retreat without a reason (burns energy) — refine later
+# Which engine action-"kind" a turn_policy step represents, signalled by the B-rule it carries.
+# (First matching rule in the step decides its kind; precedence handles multi-rule steps.)
+RULE_KIND = {
+    "B-02": "draw_supporter", "B-05": "item_search", "B-06": "evolve", "B-18": "ability",
+    "B-04": "attach", "B-14": "attach", "B-10": "stadium", "B-20": "stadium",
+    "B-07": "attack", "B-08": "attack", "B-19": "attack", "B-16": "attack",
+    "B-09": "bench", "B-01": "bench",
 }
-SCORE_SUPPORTER_BONUS = 25    # draw/utility supporter ranks near the top of the turn
-SCORE_ATTACH_ACTIVE_BONUS = 20
-SCORE_ATTACK_DMG_DIV = 8.0    # +damage/8 so a big attack can beat low-value setup
-SCORE_ATTACK_KO_BONUS = 120   # an attack that KOs the opponent's active takes a prize → do it
+KIND_PRECEDENCE = ["draw_supporter", "item_search", "bench", "evolve", "ability", "attach",
+                   "stadium", "attack"]
+
+_CARD_TABLE = None
+_ATTACK_TABLE = None
 
 
-def _opp_active_hp(obs) -> int | None:
-    opp = obs.current.players[1 - obs.current.yourIndex]
-    if opp.active and opp.active[0] is not None:
-        return opp.active[0].hp
+def _step_kind(step: dict) -> str | None:
+    kinds = {RULE_KIND[r] for r in step.get("rules", []) if r in RULE_KIND}
+    for k in KIND_PRECEDENCE:
+        if k in kinds:
+            return k
     return None
 
 
-# Module-level caches: the native card/attack tables load once per process (not per game/instance).
-_CARD_TABLE = None
-_ATTACK_TABLE = None
+def _prize_value(card) -> int:
+    return 3 if card.megaEx else 2 if card.ex else 1   # prizes the opponent takes on KO
 
 
 class HeuristicPolicy(Policy):
     def __init__(self):
         self._cards = None
         self._attacks = None
+        # Precompute the ordered (kind, step) plan once from the knowledge base.
+        self._plan = [(k, s) for s in knowledge.turn_policy() if (k := _step_kind(s))]
 
     def _ensure_tables(self):
         global _CARD_TABLE, _ATTACK_TABLE
@@ -64,100 +64,123 @@ class HeuristicPolicy(Policy):
         obs = to_observation_class(obs_dict)
         sel = obs.select
         ctx = sel.context
-        opts = sel.option
-        if not opts:
+        if not sel.option:
             return safe_selection(obs_dict["select"])
 
         if ctx == SelectContext.MAIN:
-            return [self._best_main(obs)]
+            return [self._run_turn_policy(obs)]
+        # Promote / gust target / setup-active: pick the best attacker, prefer to KO 2-prizers.
         if ctx in (SelectContext.SETUP_ACTIVE_POKEMON, SelectContext.TO_ACTIVE, SelectContext.SWITCH):
-            return self._counted(sel, self._rank_pokemon_options(obs))
+            return self._counted(sel, self._rank_my_pokemon(obs))
         if ctx in (SelectContext.SETUP_BENCH_POKEMON, SelectContext.TO_BENCH, SelectContext.TO_FIELD):
-            return self._counted(sel, self._rank_pokemon_options(obs))
+            return self._counted(sel, self._rank_my_pokemon(obs))
         if ctx == SelectContext.ATTACK:
             return [self._best_attack(obs)]
-        if ctx in (SelectContext.DAMAGE, SelectContext.DAMAGE_COUNTER,
-                   SelectContext.DAMAGE_COUNTER_ANY):
-            return self._counted(sel, self._rank_damage_targets(obs))
+        if ctx in (SelectContext.DAMAGE, SelectContext.DAMAGE_COUNTER, SelectContext.DAMAGE_COUNTER_ANY):
+            return self._counted(sel, self._rank_targets(obs))   # B-15: hit 2-prize targets
         if ctx == SelectContext.DRAW_COUNT:
-            return [self._max_number_option(opts)]          # draw as many as offered
-        # yes/no & everything else → default-safe (legal, neutral). Refined in later sprints.
+            return [self._max_number(sel.option)]
         return safe_selection(obs_dict["select"])
 
-    # ---- MAIN --------------------------------------------------------------------------------
-    def _best_main(self, obs) -> int:
-        from cg.api import AreaType
+    # ---- the turn_policy interpreter ---------------------------------------------------------
+    def _run_turn_policy(self, obs) -> int:
+        """Walk turn_policy steps in file order; take the first available action (B-18 sequencing)."""
+        opts = obs.select.option
         you = obs.current.yourIndex
         hand = obs.current.players[you].hand or []
-        opp_hp = _opp_active_hp(obs)
-        best_i, best_s = 0, float("-inf")
-        for i, o in enumerate(obs.select.option):
-            s = PRItem.get(o.type, 5)
-            if o.type == OptionType.PLAY and o.index is not None and o.index < len(hand):
-                card = self._cards.get(hand[o.index].id)
-                if card and card.cardType == CardType.SUPPORTER:
-                    s += SCORE_SUPPORTER_BONUS
-            elif o.type == OptionType.ATTACH and getattr(o, "inPlayArea", None) is not None:
-                if o.inPlayArea == AreaType.ACTIVE:
-                    s += SCORE_ATTACH_ACTIVE_BONUS
-            elif o.type == OptionType.ATTACK and o.attackId is not None:
-                atk = self._attacks.get(o.attackId)
-                if atk:
-                    s += atk.damage / SCORE_ATTACK_DMG_DIV
-                    if opp_hp is not None and atk.damage >= opp_hp:   # KO → take a prize
-                        s += SCORE_ATTACK_KO_BONUS
+        for kind, _step in self._plan:
+            matches = [i for i, o in enumerate(opts) if self._matches(kind, o, hand)]
+            if matches:
+                return self._choose(kind, matches, opts, obs)
+        # No policy step applies → end the turn (B-16: otherwise maximize setup and pass).
+        for i, o in enumerate(opts):
+            if o.type == OptionType.END:
+                return i
+        return 0
+
+    def _matches(self, kind: str, o, hand) -> bool:
+        t = o.type
+        if kind == "draw_supporter":
+            return t == OptionType.PLAY and self._card_of(o, hand) and \
+                self._card_of(o, hand).cardType == CardType.SUPPORTER
+        if kind == "item_search":
+            return t == OptionType.PLAY and self._card_of(o, hand) and \
+                self._card_of(o, hand).cardType == CardType.ITEM
+        if kind == "bench":
+            c = self._card_of(o, hand)
+            return t == OptionType.PLAY and c and c.cardType == CardType.POKEMON and c.basic
+        if kind == "evolve":
+            return t == OptionType.EVOLVE
+        if kind == "ability":
+            return t == OptionType.ABILITY
+        if kind == "attach":
+            return t == OptionType.ATTACH
+        if kind == "stadium":
+            c = self._card_of(o, hand)
+            return t == OptionType.PLAY and c and c.cardType == CardType.STADIUM
+        if kind == "attack":
+            return t == OptionType.ATTACK
+        return False
+
+    def _choose(self, kind: str, matches: list[int], opts, obs) -> int:
+        if kind == "attach":   # B-04/B-14: energy onto the active attacker
+            for i in matches:
+                if getattr(opts[i], "inPlayArea", None) == AreaType.ACTIVE:
+                    return i
+            return matches[0]
+        if kind == "attack":   # B-07/B-08/B-15: KO, preferring 2-prize targets
+            return self._best_attack(obs, restrict=matches)
+        return matches[0]
+
+    # ---- attacks / targeting -----------------------------------------------------------------
+    def _best_attack(self, obs, restrict=None) -> int:
+        opp = obs.current.players[1 - obs.current.yourIndex]
+        opp_hp = opp.active[0].hp if (opp.active and opp.active[0]) else None
+        opp_val = _prize_value(self._cards[opp.active[0].id]) if (opp.active and opp.active[0]
+                                                                  and opp.active[0].id in self._cards) else 1
+        idxs = restrict if restrict is not None else range(len(obs.select.option))
+        best_i, best_s = (idxs[0] if restrict else 0), float("-inf")
+        for i in idxs:
+            o = obs.select.option[i]
+            atk = self._attacks.get(o.attackId) if o.attackId is not None else None
+            dmg = atk.damage if atk else 0
+            s = dmg
+            if opp_hp is not None and dmg >= opp_hp:
+                s += 120 + 60 * opp_val   # KO bonus, scaled by prizes taken (B-15)
             if s > best_s:
                 best_i, best_s = i, s
         return best_i
 
-    # ---- attacks -----------------------------------------------------------------------------
-    def _best_attack(self, obs) -> int:
-        opp_hp = _opp_active_hp(obs)
-        best_i, best_s = 0, float("-inf")
-        for i, o in enumerate(obs.select.option):
-            dmg = 0
-            if o.attackId is not None:
-                atk = self._attacks.get(o.attackId)
-                dmg = atk.damage if atk else 0
-            s = dmg + (SCORE_ATTACK_KO_BONUS if opp_hp is not None and dmg >= opp_hp else 0)
-            if s > best_s:
-                best_i, best_s = i, s
-        return best_i
-
-    # ---- pokemon ranking (setup / promote): prefer higher-HP, non-2-prize liabilities --------
-    def _rank_pokemon_options(self, obs) -> list[int]:
+    def _rank_targets(self, obs) -> list[int]:
         scored = []
         for i, o in enumerate(obs.select.option):
-            card = self._cards.get(o.cardId) if o.cardId is not None else None
-            score = 0
-            if card:
-                score = card.hp - (50 if (card.ex or card.megaEx) else 0)  # avoid loose 2-prizers
-            scored.append((score, i))
+            c = self._cards.get(o.cardId) if o.cardId is not None else None
+            scored.append((_prize_value(c) if c else 0, i))
         scored.sort(reverse=True)
         return [i for _, i in scored]
 
-    # ---- damage targeting: hit the highest-value opponent Pokémon (prize trade) ---------------
-    def _rank_damage_targets(self, obs) -> list[int]:
+    def _rank_my_pokemon(self, obs) -> list[int]:
         scored = []
         for i, o in enumerate(obs.select.option):
-            card = self._cards.get(o.cardId) if o.cardId is not None else None
-            value = 0
-            if card:
-                value = (200 if card.megaEx else 100 if card.ex else 50)  # prizes on KO
-            scored.append((value, i))
+            c = self._cards.get(o.cardId) if o.cardId is not None else None
+            scored.append((c.hp if c else 0, i))
         scored.sort(reverse=True)
         return [i for _, i in scored]
 
     # ---- helpers -----------------------------------------------------------------------------
-    @staticmethod
-    def _counted(sel, ranked_indices: list[int]) -> list[int]:
-        """Take the top-`maxCount` ranked indices, at least `minCount`."""
-        k = max(int(sel.minCount), 1) if int(sel.maxCount) >= 1 else int(sel.minCount)
-        k = min(k, int(sel.maxCount), len(ranked_indices))
-        return sorted(ranked_indices[:k])
+    def _card_of(self, o, hand):
+        if o.index is not None and o.index < len(hand):
+            return self._cards.get(hand[o.index].id)
+        return None
 
     @staticmethod
-    def _max_number_option(opts) -> int:
+    def _counted(sel, ranked: list[int]) -> list[int]:
+        k = min(max(int(sel.minCount), 1), int(sel.maxCount), len(ranked)) if int(sel.maxCount) >= 1 \
+            else int(sel.minCount)
+        return sorted(ranked[:k])
+
+    @staticmethod
+    def _max_number(opts) -> int:
         best_i, best_n = 0, float("-inf")
         for i, o in enumerate(opts):
             n = o.number if o.number is not None else 0

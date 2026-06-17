@@ -1,0 +1,756 @@
+{
+  "version": "1.0",
+  "date": "2026-06-17",
+  "description": "Master rotation-agnostic heuristics for elite Pokemon TCG play, with stable IDs referenced by deck docs. Confidence: V=verified, S=sourced, T=theory/synthesis.",
+  "phases": {
+    "deckbuilding": "Deck construction: ratios, engines, line-building, card selection, archetype.",
+    "pregame": "Metagaming and tournament preparation before the event.",
+    "opening": "Mulligan, turn-order choice, and turn-1 setup.",
+    "sequencing": "Order of plays within a turn.",
+    "prize_trade": "The prize-trade and prize-mapping framework — the core scoring loop.",
+    "resources": "Board management, target selection, and resource/tempo management.",
+    "matchup": "Matchup and mirror-match decision-making.",
+    "mental": "Mental game, practice methodology, and tournament management."
+  },
+  "confidence_legend": {
+    "V": "verified (multi-source + adversarial check)",
+    "S": "sourced (single strong source)",
+    "T": "theory / synthesis"
+  },
+  "core": "Pokemon TCG is a race to six prizes governed by the prize trade; deckbuilding and play serve (a) winning that exchange and (b) being consistent enough to execute the plan every game.",
+  "meta_heuristics": [
+    {
+      "id": "M-1",
+      "title": "Consistency first",
+      "principle": "Every slot competes against 'more engine.' Cut anything a dual-purpose card replaces; do not tech away the matchups you will actually face.",
+      "supports": [
+        "H-09",
+        "H-11",
+        "H-13"
+      ]
+    },
+    {
+      "id": "M-2",
+      "title": "Math over vibes",
+      "principle": "Mulligan odds, copy-count probability, and prize math are fixed across rotations — anchor decisions to them.",
+      "supports": [
+        "H-04",
+        "H-07",
+        "H-31"
+      ]
+    },
+    {
+      "id": "M-3",
+      "title": "Prizes are the only score",
+      "principle": "Damage, tempo, and disruption matter only insofar as they move the prize trade.",
+      "supports": [
+        "H-14",
+        "H-31",
+        "H-35"
+      ]
+    },
+    {
+      "id": "M-4",
+      "title": "Information last, commitment last",
+      "principle": "Sequence every turn from reversible to irreversible; deny the opponent reads.",
+      "supports": [
+        "H-29",
+        "H-28",
+        "H-37"
+      ]
+    },
+    {
+      "id": "M-5",
+      "title": "Control the controllables",
+      "principle": "Predict the field, prepare the lines, accept the variance.",
+      "supports": [
+        "H-16",
+        "H-53",
+        "H-49"
+      ]
+    }
+  ],
+  "heuristics": [
+    {
+      "id": "H-01",
+      "phase": "deckbuilding",
+      "title": "Baseline skeleton",
+      "principle": "Start from ~20 Pokemon / ~30 Trainer / ~10-11 Energy, tune +/-3.",
+      "rationale": "Balances board presence, engine, and attack cost; a testing starting point, not a law.",
+      "confidence": "V",
+      "tags": [
+        "ratios",
+        "skeleton"
+      ]
+    },
+    {
+      "id": "H-02",
+      "phase": "deckbuilding",
+      "title": "Trainer budget",
+      "principle": "Inside ~30 Trainers: 6-12 Supporters (4-9 draw, 2-4 gust), 15-20 Items (8-10 search, 2-3 Stadiums).",
+      "rationale": "Draw+search is the engine; gust converts board control into prizes. Under-supporting draw causes bricking.",
+      "confidence": "V",
+      "tags": [
+        "ratios",
+        "engine"
+      ]
+    },
+    {
+      "id": "H-03",
+      "phase": "deckbuilding",
+      "title": "Energy count",
+      "principle": "Default ~11 Energy; cut toward 8 as search density rises.",
+      "rationale": "Search fetches energy on demand, so high search density needs fewer raw copies. Decide count after building the engine.",
+      "confidence": "V",
+      "tags": [
+        "energy",
+        "ratios"
+      ]
+    },
+    {
+      "id": "H-04",
+      "phase": "deckbuilding",
+      "title": "Basic floor",
+      "principle": "Run enough Basics to keep mulligans low — commonly ~10+.",
+      "rationale": "P(no Basic in 7) falls ~88%@1 -> ~53%@5 -> ~26%@10 -> ~5%@20. Each mulligan gives the opponent a card and info.",
+      "confidence": "V",
+      "tags": [
+        "consistency",
+        "probability",
+        "mulligan"
+      ]
+    },
+    {
+      "id": "H-05",
+      "phase": "deckbuilding",
+      "title": "Line scaling",
+      "principle": "Scale evolution counts by stage: 4 Basic attacker; 4-3 Stage 1; 4-2-4 Stage 2.",
+      "rationale": "The bottleneck is always the bottom of the line — you cannot evolve what you did not open.",
+      "confidence": "V",
+      "tags": [
+        "lines",
+        "ratios"
+      ]
+    },
+    {
+      "id": "H-06",
+      "phase": "deckbuilding",
+      "title": "Rare Candy skip",
+      "principle": "In Stage 2 decks run 3-4 Rare Candy and thin/omit the Stage 1.",
+      "rationale": "Skip-the-middle buys a turn of tempo and frees deck slots; the Stage 1 becomes a backup line.",
+      "confidence": "V",
+      "tags": [
+        "lines",
+        "tempo"
+      ]
+    },
+    {
+      "id": "H-07",
+      "phase": "deckbuilding",
+      "title": "Copy probability",
+      "principle": "Value each copy by draw probability, not feel.",
+      "rationale": "A 1-of appears in the opening 7 ~11.7%; a 4-of ~40%. 1->2 copies is the biggest per-slot consistency jump. Reserve 1-ofs for searchable cards.",
+      "confidence": "V",
+      "tags": [
+        "probability",
+        "consistency"
+      ]
+    },
+    {
+      "id": "H-08",
+      "phase": "deckbuilding",
+      "title": "Engine type",
+      "principle": "Pick engine by need: exact-search for a few specific pieces (enables thin 1-of lines); pure-draw when you need multiple pieces per turn.",
+      "rationale": "Search maximizes precision; draw maximizes volume. Match the tool to the problem.",
+      "confidence": "V",
+      "tags": [
+        "engine",
+        "consistency"
+      ]
+    },
+    {
+      "id": "H-09",
+      "phase": "deckbuilding",
+      "title": "Keep an engine",
+      "principle": "Run at least one dedicated consistency engine unless testing proves otherwise.",
+      "rationale": "Its real job is to rescue brick hands and smooth variance.",
+      "confidence": "V",
+      "tags": [
+        "engine",
+        "consistency"
+      ]
+    },
+    {
+      "id": "H-10",
+      "phase": "deckbuilding",
+      "title": "Max core supporters",
+      "principle": "Near-max the Supporters that ARE your engine (3-4 copies of core setup/search Supporters).",
+      "rationale": "Load-bearing turn-1 cards must be hit on schedule.",
+      "confidence": "V",
+      "tags": [
+        "engine",
+        "ratios"
+      ]
+    },
+    {
+      "id": "H-11",
+      "phase": "deckbuilding",
+      "title": "Consolidate",
+      "principle": "Cut any card whose job a dual-purpose card can also do.",
+      "rationale": "Slot efficiency is how a full engine + attackers + tech fit in 60. Ask: does one card do the work of two?",
+      "confidence": "V",
+      "tags": [
+        "slots",
+        "tech"
+      ]
+    },
+    {
+      "id": "H-12",
+      "phase": "deckbuilding",
+      "title": "Secondary roles",
+      "principle": "Build secondary attackers for a specific role: single-prize trade-fixer, fast revenge/carry, alternate-weakness, or a different weakness than the main.",
+      "rationale": "Each secondary should answer a problem the main attacker cannot.",
+      "confidence": "V",
+      "tags": [
+        "attackers",
+        "roles"
+      ]
+    },
+    {
+      "id": "H-13",
+      "phase": "deckbuilding",
+      "title": "Tech for the field",
+      "principle": "Tech for the predicted field, not every possibility.",
+      "rationale": "Tech slots come out of consistency; dedicate them only to the top expected decks.",
+      "confidence": "S",
+      "tags": [
+        "tech",
+        "meta"
+      ]
+    },
+    {
+      "id": "H-14",
+      "phase": "deckbuilding",
+      "title": "Know your archetype",
+      "principle": "Know which strategy you execute — Aggression/Control/Mill/Stall — each is a stance on the prize trade.",
+      "rationale": "Your archetype dictates the default line in every ambiguous spot.",
+      "confidence": "V",
+      "tags": [
+        "archetype",
+        "strategy"
+      ]
+    },
+    {
+      "id": "H-15",
+      "phase": "deckbuilding",
+      "title": "Define win condition",
+      "principle": "Define your deck's win condition explicitly and build toward it.",
+      "rationale": "It tells you which resources to protect and which to spend freely.",
+      "confidence": "T",
+      "tags": [
+        "wincon",
+        "strategy"
+      ]
+    },
+    {
+      "id": "H-16",
+      "phase": "pregame",
+      "title": "Predict the field",
+      "principle": "Predict the field before picking a deck — top 3-5 archetypes and rough share.",
+      "rationale": "Even a powerful deck loses to a field of counters; predict via results aggregators.",
+      "confidence": "V",
+      "tags": [
+        "meta",
+        "prep"
+      ]
+    },
+    {
+      "id": "H-17",
+      "phase": "pregame",
+      "title": "Matchup spread",
+      "principle": "Choose for matchup spread, not one great pairing.",
+      "rationale": "~50/50 across the whole field beats crushing one archetype and folding to another.",
+      "confidence": "S",
+      "tags": [
+        "meta",
+        "deckchoice"
+      ]
+    },
+    {
+      "id": "H-18",
+      "phase": "pregame",
+      "title": "Budget for rogue",
+      "principle": "Reserve ~10% of your forecast for rogue/'other'.",
+      "rationale": "The field is never fully predictable; budgeting for surprise prevents an auto-loss.",
+      "confidence": "S",
+      "tags": [
+        "meta",
+        "prep"
+      ]
+    },
+    {
+      "id": "H-19",
+      "phase": "pregame",
+      "title": "Two counter layers",
+      "principle": "Stop at two layers of counter-picking.",
+      "rationale": "Countering the counter-of-the-counter loops back to vulnerability to the original decks.",
+      "confidence": "S",
+      "tags": [
+        "meta",
+        "deckchoice"
+      ]
+    },
+    {
+      "id": "H-20",
+      "phase": "pregame",
+      "title": "Local read",
+      "principle": "For local events factor in who is attending.",
+      "rationale": "Known pilots and pet decks let you make surgical tech choices.",
+      "confidence": "S",
+      "tags": [
+        "meta",
+        "prep"
+      ]
+    },
+    {
+      "id": "H-21",
+      "phase": "pregame",
+      "title": "Test your read",
+      "principle": "Pressure-test your meta read with skilled peers.",
+      "rationale": "Collaborative forecasting catches blind spots a solo analysis misses.",
+      "confidence": "S",
+      "tags": [
+        "meta",
+        "prep"
+      ]
+    },
+    {
+      "id": "H-22",
+      "phase": "opening",
+      "title": "Turn-order choice",
+      "principle": "Going first vs second is deck-dependent: first = setup turn (no T1 attack); second = extra card + first attack.",
+      "rationale": "Setup-heavy decks want first; fast/aggressive decks want second. Decide by whose tempo plan needs the turn more.",
+      "confidence": "T",
+      "tags": [
+        "turnorder",
+        "tempo"
+      ]
+    },
+    {
+      "id": "H-23",
+      "phase": "opening",
+      "title": "Turn-1 priority",
+      "principle": "Turn-1 priority: establish attacker-Basic -> develop engine -> build needed bench -> commit energy last.",
+      "rationale": "You cannot win a game you cannot start; T1 guarantees reaching the payoff.",
+      "confidence": "T",
+      "tags": [
+        "setup",
+        "sequencing"
+      ]
+    },
+    {
+      "id": "H-24",
+      "phase": "opening",
+      "title": "Buy optionality first",
+      "principle": "Going first, buy future optionality, not present tempo.",
+      "rationale": "With no attack available, maximize the number of strong plays available next turn.",
+      "confidence": "T",
+      "tags": [
+        "setup",
+        "tempo"
+      ]
+    },
+    {
+      "id": "H-25",
+      "phase": "sequencing",
+      "title": "Draw then search",
+      "principle": "Draw before you search; search before you commit.",
+      "rationale": "Decide with full hand knowledge, then search only for what is left.",
+      "confidence": "S",
+      "tags": [
+        "sequencing"
+      ]
+    },
+    {
+      "id": "H-26",
+      "phase": "sequencing",
+      "title": "Abilities after draw",
+      "principle": "Use board/choice Abilities after drawing, not before.",
+      "rationale": "Every irreversible decision should be made with the most information available that turn.",
+      "confidence": "S",
+      "tags": [
+        "sequencing",
+        "information"
+      ]
+    },
+    {
+      "id": "H-27",
+      "phase": "sequencing",
+      "title": "Attach energy last",
+      "principle": "Attach energy as one of your last actions before declaring an attack.",
+      "rationale": "It is irreversible and telegraphs your plan; delaying preserves flexibility.",
+      "confidence": "S",
+      "tags": [
+        "sequencing",
+        "energy"
+      ]
+    },
+    {
+      "id": "H-28",
+      "phase": "sequencing",
+      "title": "Delay benching",
+      "principle": "Delay benching and other commitments until forced.",
+      "rationale": "Every benched Pokemon is a future target and a piece of the opponent's prize map.",
+      "confidence": "S",
+      "tags": [
+        "sequencing",
+        "bench"
+      ]
+    },
+    {
+      "id": "H-29",
+      "phase": "sequencing",
+      "title": "Reversible first",
+      "principle": "Master rule: reversible & info-gathering plays first, irreversible plays last.",
+      "rationale": "Order every turn from least-committal to most-committal.",
+      "confidence": "T",
+      "tags": [
+        "sequencing",
+        "information"
+      ]
+    },
+    {
+      "id": "H-30",
+      "phase": "sequencing",
+      "title": "Break rules knowingly",
+      "principle": "Know when to break sequencing rules (e.g., desperate for a Basic -> search early, hold draw as backup).",
+      "rationale": "Heuristics are defaults, not handcuffs; information gain can justify reordering.",
+      "confidence": "S",
+      "tags": [
+        "sequencing"
+      ]
+    },
+    {
+      "id": "H-31",
+      "phase": "prize_trade",
+      "title": "Win the trade",
+      "principle": "Win by taking more prizes per KO than you concede.",
+      "rationale": "Most games are decided in the prize exchange, not raw damage. The central framework.",
+      "confidence": "V",
+      "tags": [
+        "prizetrade",
+        "core"
+      ]
+    },
+    {
+      "id": "H-32",
+      "phase": "prize_trade",
+      "title": "Prefer single-prize",
+      "principle": "Prefer single-prize attackers when their damage is competitive.",
+      "rationale": "A 1-prize attacker doing 160 is strictly superior to a 2-prize one doing 160 for similar cost.",
+      "confidence": "V",
+      "tags": [
+        "prizetrade",
+        "attackers"
+      ]
+    },
+    {
+      "id": "H-33",
+      "phase": "prize_trade",
+      "title": "Main attacker bars",
+      "principle": "A main attacker must be (a) fast and (b) deal enough damage relative to prizes surrendered.",
+      "rationale": "The more prizes it gives up when KO'd, the more damage it must produce to be worth running.",
+      "confidence": "V",
+      "tags": [
+        "attackers",
+        "prizetrade"
+      ]
+    },
+    {
+      "id": "H-34",
+      "phase": "prize_trade",
+      "title": "Map the KO sequence",
+      "principle": "Map your full knockout sequence the moment you see the opponent's board.",
+      "rationale": "A clean 2-2-2 map beats a mixed 1-1-2-2; knowing the path tells you which attacker to use now.",
+      "confidence": "S",
+      "tags": [
+        "prizemap",
+        "planning"
+      ]
+    },
+    {
+      "id": "H-35",
+      "phase": "prize_trade",
+      "title": "Target multi-prize",
+      "principle": "Target multi-prize Pokemon; do not waste gust/removal on 1-prize support.",
+      "rationale": "Prizes are the currency; spending resources on a 1-prize body is a losing exchange unless it enables their engine.",
+      "confidence": "S",
+      "tags": [
+        "targeting",
+        "prizetrade"
+      ]
+    },
+    {
+      "id": "H-36",
+      "phase": "prize_trade",
+      "title": "Force inefficient maps",
+      "principle": "Force the opponent into an inefficient prize map (present 1-prizers so they need 6+ KOs).",
+      "rationale": "Asymmetric prize counts double the time you have to win.",
+      "confidence": "S",
+      "tags": [
+        "prizemap",
+        "disruption"
+      ]
+    },
+    {
+      "id": "H-37",
+      "phase": "prize_trade",
+      "title": "Limit bench liability",
+      "principle": "Do not bench multi-prize Pokemon you do not need this turn.",
+      "rationale": "An idle 2-prize Pokemon is two free prizes for a gust effect.",
+      "confidence": "S",
+      "tags": [
+        "bench",
+        "prizetrade"
+      ]
+    },
+    {
+      "id": "H-38",
+      "phase": "prize_trade",
+      "title": "Prize-check",
+      "principle": "Prize-check on every search; re-plan around prized key cards.",
+      "rationale": "Do not build a line that depends on a card sitting in the prizes.",
+      "confidence": "S",
+      "tags": [
+        "prizemap",
+        "planning"
+      ]
+    },
+    {
+      "id": "H-39",
+      "phase": "prize_trade",
+      "title": "Fast-prizing cost",
+      "principle": "The cost of fast prizing scales with the format's disruption.",
+      "rationale": "Weak comeback/hand-refresh tools make racing low-risk; do not blanket-rule 'always set up fully first'.",
+      "confidence": "V",
+      "tags": [
+        "prizetrade",
+        "disruption",
+        "tempo"
+      ]
+    },
+    {
+      "id": "H-40",
+      "phase": "resources",
+      "title": "Spend at the right rate",
+      "principle": "Spend resources at the rate the matchup demands — no faster.",
+      "rationale": "Aggro mirrors are races (conserve); grind matchups reward out-attrition.",
+      "confidence": "T",
+      "tags": [
+        "resources",
+        "matchup"
+      ]
+    },
+    {
+      "id": "H-41",
+      "phase": "resources",
+      "title": "Keep an out",
+      "principle": "Keep at least one path back to your engine in hand.",
+      "rationale": "Emptying your hand and bricking is the fastest way to lose from ahead.",
+      "confidence": "T",
+      "tags": [
+        "resources",
+        "consistency"
+      ]
+    },
+    {
+      "id": "H-42",
+      "phase": "resources",
+      "title": "Play around outs",
+      "principle": "Play around the opponent's outs, not just their current board.",
+      "rationale": "Take the line that wins against the probable case while hedging the catastrophic one.",
+      "confidence": "T",
+      "tags": [
+        "reads",
+        "risk"
+      ]
+    },
+    {
+      "id": "H-43",
+      "phase": "resources",
+      "title": "Name tempo vs value",
+      "principle": "Trade tempo vs value deliberately — name which you are buying.",
+      "rationale": "Taking an immediate KO (tempo) vs building a stronger board (value) is the recurring decision.",
+      "confidence": "T",
+      "tags": [
+        "tempo",
+        "value"
+      ]
+    },
+    {
+      "id": "H-44",
+      "phase": "resources",
+      "title": "Track hidden info",
+      "principle": "Track your discard and deck as known information.",
+      "rationale": "Counting remaining copies converts guesses into odds.",
+      "confidence": "T",
+      "tags": [
+        "information",
+        "counting"
+      ]
+    },
+    {
+      "id": "H-45",
+      "phase": "matchup",
+      "title": "Protect setup in mirror",
+      "principle": "In the mirror, falling behind on tempo is hard to recover — protect your setup.",
+      "rationale": "Small early leads compound when both decks do the same thing.",
+      "confidence": "S",
+      "tags": [
+        "mirror",
+        "tempo"
+      ]
+    },
+    {
+      "id": "H-46",
+      "phase": "matchup",
+      "title": "Mirror redundancy",
+      "principle": "In the mirror, run redundancy against single-point-of-failure plays.",
+      "rationale": "Do not let one snipe or disruption derail your whole plan.",
+      "confidence": "S",
+      "tags": [
+        "mirror",
+        "consistency"
+      ]
+    },
+    {
+      "id": "H-47",
+      "phase": "matchup",
+      "title": "Differentiating tech",
+      "principle": "Differentiating tech, not raw power, often decides the mirror.",
+      "rationale": "The teched build wins the games the stock build draws.",
+      "confidence": "S",
+      "tags": [
+        "mirror",
+        "tech"
+      ]
+    },
+    {
+      "id": "H-48",
+      "phase": "matchup",
+      "title": "Lock is tempo",
+      "principle": "Treat lock/disruption as a tempo tool, not a permanent state.",
+      "rationale": "Apply and release situationally to maximize advantage windows.",
+      "confidence": "S",
+      "tags": [
+        "disruption",
+        "control"
+      ]
+    },
+    {
+      "id": "H-49",
+      "phase": "mental",
+      "title": "Decisions over results",
+      "principle": "Optimize for decision quality, not round results — the only controllable.",
+      "rationale": "Outcomes ride on variance you cannot touch; judge yourself on the correct line.",
+      "confidence": "S",
+      "tags": [
+        "mindset",
+        "variance"
+      ]
+    },
+    {
+      "id": "H-50",
+      "phase": "mental",
+      "title": "Compartmentalize",
+      "principle": "Compartmentalize round-by-round.",
+      "rationale": "Projecting anxiety onto later rounds accumulates stress and degrades current decisions.",
+      "confidence": "S",
+      "tags": [
+        "mindset",
+        "focus"
+      ]
+    },
+    {
+      "id": "H-51",
+      "phase": "mental",
+      "title": "Deliberate practice",
+      "principle": "Practice deliberately, not just frequently.",
+      "rationale": "Focused sessions with specific goals build skill; volume without intention plateaus.",
+      "confidence": "S",
+      "tags": [
+        "practice"
+      ]
+    },
+    {
+      "id": "H-52",
+      "phase": "mental",
+      "title": "Review for mistakes",
+      "principle": "Review games for mistakes; post-game clarity proves in-game capability.",
+      "rationale": "If you can spot the error afterward, the gap is execution under pressure, not knowledge.",
+      "confidence": "S",
+      "tags": [
+        "practice",
+        "review"
+      ]
+    },
+    {
+      "id": "H-53",
+      "phase": "mental",
+      "title": "Write a playbook",
+      "principle": "Write a per-matchup playbook before the event (lines, gameplan, prize map, techs, wincon).",
+      "rationale": "Documenting turns uncertainty into pre-made decisions executable on autopilot.",
+      "confidence": "S",
+      "tags": [
+        "prep",
+        "playbook"
+      ]
+    },
+    {
+      "id": "H-54",
+      "phase": "mental",
+      "title": "Simulate conditions",
+      "principle": "Simulate tournament conditions in practice (timer, stakes, focus).",
+      "rationale": "Practicing under real conditions makes the event feel familiar.",
+      "confidence": "S",
+      "tags": [
+        "practice",
+        "prep"
+      ]
+    },
+    {
+      "id": "H-55",
+      "phase": "mental",
+      "title": "Physical baseline",
+      "principle": "Maintain the physical baseline — sleep 7+ hours, hydrate, eat.",
+      "rationale": "Physical state cascades directly into late-round decision quality.",
+      "confidence": "S",
+      "tags": [
+        "wellbeing"
+      ]
+    },
+    {
+      "id": "H-56",
+      "phase": "mental",
+      "title": "Confidence=competence",
+      "principle": "Interrupt automatic negative thoughts; align confidence with competence.",
+      "rationale": "Both under- and over-confidence cost games; build skill until belief matches ability.",
+      "confidence": "S",
+      "tags": [
+        "mindset"
+      ]
+    },
+    {
+      "id": "H-57",
+      "phase": "mental",
+      "title": "Copy systems",
+      "principle": "Study top players' systems, not their card lists.",
+      "rationale": "Replicating methods (testing, review, matchup study) compounds faster than copying a deck.",
+      "confidence": "S",
+      "tags": [
+        "practice",
+        "learning"
+      ]
+    }
+  ]
+}

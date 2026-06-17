@@ -1,0 +1,349 @@
+{
+  "version": "1.0",
+  "date": "2026-06-17",
+  "level": "beginner",
+  "description": "Minimum heuristics for an agent to play Pokemon TCG decently: legal, consistent plays that take prizes and avoid self-inflicted losses. Each rule maps to the advanced heuristic it simplifies (see heuristics.json).",
+  "core": "Set up a main attacker, refill with a draw Supporter every turn, attack every turn you can, take prizes off the opponent's 2-prize Pokemon, and do not give away free prizes or brick your own hand.",
+  "priority_legend": {
+    "golden": "do this almost every game/turn",
+    "important": "follow unless a clear reason not to",
+    "situational": "apply when the spot calls for it"
+  },
+  "opening_policy": [
+    {
+      "step": 1,
+      "action": "Ensure a Basic is in the Active Spot (mandatory; no Basic forces a mulligan).",
+      "rules": [
+        "B-01"
+      ]
+    },
+    {
+      "step": 2,
+      "action": "Choose turn order by deck speed: an aggressive/fast deck takes second (attack sooner); a setup-heavy deck takes first (free setup turn).",
+      "rules": [
+        "B-13"
+      ]
+    },
+    {
+      "step": 3,
+      "action": "Bench the Basics you plan to use; avoid benching 2-prize Pokemon you do not need yet.",
+      "rules": [
+        "B-09"
+      ]
+    }
+  ],
+  "turn_policy": [
+    {
+      "step": 1,
+      "action": "If your hand is low or you need cards, play your draw Supporter first.",
+      "rules": [
+        "B-02",
+        "B-03"
+      ]
+    },
+    {
+      "step": 2,
+      "action": "Play Item search cards to find Basics and evolution pieces you need.",
+      "rules": [
+        "B-05"
+      ]
+    },
+    {
+      "step": 3,
+      "action": "Bench Basics you will actually use this game (do not over-bench).",
+      "rules": [
+        "B-01",
+        "B-09"
+      ]
+    },
+    {
+      "step": 4,
+      "action": "Evolve Pokemon toward your main attacker (Rare Candy to reach a Stage 2).",
+      "rules": [
+        "B-06"
+      ]
+    },
+    {
+      "step": 5,
+      "action": "Use helpful Abilities (after drawing, so you know what you need).",
+      "rules": [
+        "B-18"
+      ]
+    },
+    {
+      "step": 6,
+      "action": "Attach your one Energy for the turn to your main attacker.",
+      "rules": [
+        "B-03",
+        "B-04",
+        "B-14"
+      ]
+    },
+    {
+      "step": 7,
+      "action": "Manage the Stadium and a retreat/switch option if needed.",
+      "rules": [
+        "B-10",
+        "B-20"
+      ]
+    },
+    {
+      "step": 8,
+      "action": "Use a gust effect if it sets up a KO or wins the game.",
+      "rules": [
+        "B-12",
+        "B-15"
+      ]
+    },
+    {
+      "step": 9,
+      "action": "If the Active can attack, attack — take a KO if available, preferring 2-prize targets. Otherwise maximize setup and pass.",
+      "rules": [
+        "B-07",
+        "B-08",
+        "B-16",
+        "B-19"
+      ]
+    }
+  ],
+  "rules": [
+    {
+      "id": "B-01",
+      "title": "Get a Basic active",
+      "rule": "On setup put a Basic in the Active Spot and bench the Basics you actually plan to use.",
+      "why": "You cannot play without an Active Pokemon; no Basic = mulligan.",
+      "priority": "golden",
+      "maps_to": [
+        "H-23",
+        "H-04"
+      ]
+    },
+    {
+      "id": "B-02",
+      "title": "Draw before you search",
+      "rule": "Almost every turn, play your draw Supporter (e.g. the format's main draw card) FIRST, before Item search.",
+      "why": "Refills your hand and you decide what to search for with full information.",
+      "priority": "golden",
+      "maps_to": [
+        "H-25",
+        "H-09"
+      ]
+    },
+    {
+      "id": "B-03",
+      "title": "One Supporter, one Energy per turn",
+      "rule": "You may play only one Supporter and make one Energy attachment per turn — never waste either.",
+      "why": "These are your scarcest per-turn resources; skipping them loses tempo.",
+      "priority": "golden",
+      "maps_to": [
+        "H-27"
+      ]
+    },
+    {
+      "id": "B-04",
+      "title": "Attach energy to your attacker",
+      "rule": "Attach your one Energy each turn to the Pokemon you intend to attack with.",
+      "why": "Spreading energy across Pokemon you will not attack with wastes turns.",
+      "priority": "golden",
+      "maps_to": [
+        "H-27",
+        "H-14"
+      ]
+    },
+    {
+      "id": "B-05",
+      "title": "Search for your pieces",
+      "rule": "Use Item search cards (Poffin/Balls) to find your Basics and evolution pieces.",
+      "why": "Consistency comes from search; do not rely on topdecking your key cards.",
+      "priority": "golden",
+      "maps_to": [
+        "H-08"
+      ]
+    },
+    {
+      "id": "B-06",
+      "title": "Evolve toward your attacker",
+      "rule": "Evolve as fast as possible toward your main attacker; use Rare Candy to jump straight to a Stage 2.",
+      "why": "Your deck does nothing until its main attacker is online.",
+      "priority": "golden",
+      "maps_to": [
+        "H-05",
+        "H-06"
+      ]
+    },
+    {
+      "id": "B-07",
+      "title": "Attack every turn you can",
+      "rule": "Once your attacker is charged, attack every turn. If you can KO something, take the KO.",
+      "why": "Passing without attacking concedes tempo and prizes.",
+      "priority": "golden",
+      "maps_to": [
+        "H-33",
+        "H-43"
+      ]
+    },
+    {
+      "id": "B-08",
+      "title": "Take prizes; you need six",
+      "rule": "Win by taking all your Prize cards (usually 6). Prefer KOing the opponent's Active attacker.",
+      "why": "Prizes are the only score; track how many KOs remain to win.",
+      "priority": "golden",
+      "maps_to": [
+        "H-31",
+        "H-34"
+      ]
+    },
+    {
+      "id": "B-09",
+      "title": "Do not over-bench",
+      "rule": "Only bench Pokemon you will use. Extra Pokemon become extra prizes for the opponent.",
+      "why": "Idle Pokemon (especially 2-prize ones) are free prizes if gusted.",
+      "priority": "important",
+      "maps_to": [
+        "H-28",
+        "H-37"
+      ]
+    },
+    {
+      "id": "B-10",
+      "title": "Keep an escape plan",
+      "rule": "Keep a way to retreat or switch your Active before it gets KO'd or stuck.",
+      "why": "Being unable to move a damaged/stalled Active loses games.",
+      "priority": "important",
+      "maps_to": [
+        "H-41"
+      ]
+    },
+    {
+      "id": "B-11",
+      "title": "Keep an out in hand",
+      "rule": "Do not empty your hand recklessly; try to keep a draw or search card available.",
+      "why": "Running out of cards (bricking) is a self-inflicted loss.",
+      "priority": "important",
+      "maps_to": [
+        "H-41"
+      ]
+    },
+    {
+      "id": "B-12",
+      "title": "Use gust to close or swing tempo",
+      "rule": "Use gust effects (e.g. Boss's Orders) to drag up a Pokemon you can KO for the win or big tempo.",
+      "why": "Choosing the KO target often matters more than the damage itself.",
+      "priority": "important",
+      "maps_to": [
+        "H-35",
+        "H-36"
+      ]
+    },
+    {
+      "id": "B-13",
+      "title": "First sets up, second attacks",
+      "rule": "If you go first you cannot attack turn 1 — use it to set up. If you go second you can attack — set up, then attack.",
+      "why": "Misusing the first turn (or forgetting you can attack going second) wastes tempo.",
+      "priority": "important",
+      "maps_to": [
+        "H-22",
+        "H-24"
+      ]
+    },
+    {
+      "id": "B-14",
+      "title": "Commit to one main attacker",
+      "rule": "Build up and attack with one main attacker rather than splitting energy across several.",
+      "why": "Half-charged attackers do nothing; focus reaches the attack threshold.",
+      "priority": "important",
+      "maps_to": [
+        "H-12",
+        "H-27"
+      ]
+    },
+    {
+      "id": "B-15",
+      "title": "Hit 2-prize targets, not 1-prize support",
+      "rule": "When choosing what to KO or gust, prefer the opponent's 2-prize attackers over 1-prize support.",
+      "why": "Same effort, double the prizes — unless the support card is enabling their whole engine.",
+      "priority": "important",
+      "maps_to": [
+        "H-35"
+      ]
+    },
+    {
+      "id": "B-16",
+      "title": "If you cannot attack, maximize setup",
+      "rule": "On a turn you cannot attack, spend it drawing, searching, evolving, benching, and attaching.",
+      "why": "Idle turns should still advance your board toward attacking next turn.",
+      "priority": "important",
+      "maps_to": [
+        "H-23",
+        "H-24"
+      ]
+    },
+    {
+      "id": "B-17",
+      "title": "Play toward your win condition",
+      "rule": "Know how your deck wins and make plays that advance that plan; do not get distracted.",
+      "why": "A clear plan turns ambiguous spots into easy decisions.",
+      "priority": "important",
+      "maps_to": [
+        "H-15",
+        "H-14"
+      ]
+    },
+    {
+      "id": "B-18",
+      "title": "Sequence: reversible plays first",
+      "rule": "Order a turn: draw -> search -> evolve/bench -> use abilities -> attach energy -> attack.",
+      "why": "Do information-gathering first and irreversible plays last so you keep options open.",
+      "priority": "important",
+      "maps_to": [
+        "H-29",
+        "H-26"
+      ]
+    },
+    {
+      "id": "B-19",
+      "title": "Meet the energy cost before attacking",
+      "rule": "Only declare an attack when the attacker has the required Energy attached.",
+      "why": "Attempting an unpayable attack is an illegal/wasted action.",
+      "priority": "golden",
+      "maps_to": [
+        "H-33"
+      ]
+    },
+    {
+      "id": "B-20",
+      "title": "Manage the Stadium",
+      "rule": "Play your own Stadium when it helps you, especially to replace one that helps the opponent.",
+      "why": "A live opposing Stadium can quietly swing the game.",
+      "priority": "situational",
+      "maps_to": [
+        "H-11"
+      ]
+    },
+    {
+      "id": "B-21",
+      "title": "Ahead play safe, behind take risks",
+      "rule": "When ahead on prizes, make safe consistent plays; when behind, take the higher-variance line that can catch up.",
+      "why": "Match your risk level to the prize score.",
+      "priority": "situational",
+      "maps_to": [
+        "H-40",
+        "H-43"
+      ]
+    },
+    {
+      "id": "B-22",
+      "title": "Do not deck yourself out",
+      "rule": "Late game, watch how many cards remain in your deck; running out on your draw step loses.",
+      "why": "Over-drawing/over-searching can self-mill into a loss.",
+      "priority": "situational",
+      "maps_to": [
+        "H-44"
+      ]
+    }
+  ],
+  "links": {
+    "advanced_heuristics": "heuristics.json",
+    "note": "`maps_to` and policy `rules` reference these IDs."
+  }
+}
