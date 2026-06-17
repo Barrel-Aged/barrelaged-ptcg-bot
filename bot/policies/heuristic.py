@@ -69,11 +69,12 @@ class HeuristicPolicy(Policy):
 
         if ctx == SelectContext.MAIN:
             return [self._run_turn_policy(obs)]
-        # Promote / gust target / setup-active: pick the best attacker, prefer to KO 2-prizers.
+        # Promote/active (H-33: put your best attacker up). Bench (H-37/H-32/B-09: prefer
+        # single-prize, don't volunteer 2-prize liabilities you don't need).
         if ctx in (SelectContext.SETUP_ACTIVE_POKEMON, SelectContext.TO_ACTIVE, SelectContext.SWITCH):
-            return self._counted(sel, self._rank_my_pokemon(obs))
+            return self._counted(sel, self._rank_attacker(obs))
         if ctx in (SelectContext.SETUP_BENCH_POKEMON, SelectContext.TO_BENCH, SelectContext.TO_FIELD):
-            return self._counted(sel, self._rank_my_pokemon(obs))
+            return self._counted(sel, self._rank_bench(obs))
         if ctx == SelectContext.ATTACK:
             return [self._best_attack(obs)]
         if ctx in (SelectContext.DAMAGE, SelectContext.DAMAGE_COUNTER, SelectContext.DAMAGE_COUNTER_ANY):
@@ -159,13 +160,24 @@ class HeuristicPolicy(Policy):
         scored.sort(reverse=True)
         return [i for _, i in scored]
 
-    def _rank_my_pokemon(self, obs) -> list[int]:
+    def _rank_attacker(self, obs) -> list[int]:
+        """H-33: promote the best attacker (highest HP as a threat proxy; 2-prize is fine here)."""
         scored = []
         for i, o in enumerate(obs.select.option):
             c = self._cards.get(o.cardId) if o.cardId is not None else None
             scored.append((c.hp if c else 0, i))
         scored.sort(reverse=True)
         return [i for _, i in scored]
+
+    def _rank_bench(self, obs) -> list[int]:
+        """H-37/H-32/B-09: prefer single-prize benchers (less prize liability), HP as tiebreak."""
+        scored = []
+        for i, o in enumerate(obs.select.option):
+            c = self._cards.get(o.cardId) if o.cardId is not None else None
+            liability = _prize_value(c) if c else 1          # 1 / 2 / 3 prizes on KO
+            scored.append((-liability, c.hp if c else 0, i))  # fewest prizes first, then HP
+        scored.sort(reverse=True)
+        return [i for *_, i in scored]
 
     # ---- helpers -----------------------------------------------------------------------------
     def _card_of(self, o, hand):
