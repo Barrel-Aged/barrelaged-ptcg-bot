@@ -28,7 +28,8 @@ MCTS_CONTEXTS = {SelectContext.MAIN, SelectContext.ATTACK}  # where lookahead pa
 class MctsPolicy(Policy):
     def __init__(self, our_deck: list[int] | None = None, seed: int = 0,
                  move_budget_s: float | None = None, min_samples: int = 20,
-                 force_archetype: str | None = None, hedge: bool = False):
+                 force_archetype: str | None = None, hedge: bool = False,
+                 n_iterations: int | None = None):
         self._heur = HeuristicPolicy()
         self._ident = DeckIdentifier(your_index=0)
         self._our_deck = our_deck
@@ -43,6 +44,10 @@ class MctsPolicy(Policy):
         # determinization variance that hurts flat-MC with few samples (worse than fixed top-1).
         # Kept for future UCT/opponent-aware search where hidden-info modeling may pay off.
         self._hedge = hedge
+        # Eval reproducibility: a FIXED determinization-iteration count removes the wall-clock-timing
+        # variance (CPU load → different #iters → different decisions). For deployment leave None and
+        # use the time budget. Engine RNG variance is irreducible regardless (cg has no seed).
+        self._n_iterations = n_iterations
 
     def set_deck(self, deck: list[int]) -> None:
         self._our_deck = deck
@@ -84,7 +89,12 @@ class MctsPolicy(Policy):
         import time
         start = time.monotonic()
         iters = 0
-        while time.monotonic() - start < deadline:
+        while True:
+            if self._n_iterations is not None:
+                if iters >= self._n_iterations:
+                    break
+            elif time.monotonic() - start >= deadline:
+                break
             if fixed_deck is not None:
                 predicted = fixed_deck
             else:   # hedge: sample a fresh archetype hypothesis weighted by the posterior
@@ -97,8 +107,8 @@ class MctsPolicy(Policy):
                 counts[a] += 1
             search_end()
             iters += 1
-            if iters >= 2 and min(counts) >= self._min_samples:    # enough samples — stop early
-                break
+            if self._n_iterations is None and iters >= 2 and min(counts) >= self._min_samples:
+                break    # time-budget mode: enough samples → stop early (eval mode runs exactly N)
         if not any(counts):
             return self._heur.select_typed(obs)[0]
         means = [totals[a] / counts[a] if counts[a] else -1e9 for a in range(n_actions)]
