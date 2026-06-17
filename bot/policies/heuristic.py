@@ -72,9 +72,17 @@ def _effective_damage(base: int, attacker_type, defender_card) -> int:
 
 
 class HeuristicPolicy(Policy):
-    def __init__(self, gate_draw_abilities_by_hand: bool = True):
+    def __init__(self, gate_draw_abilities_by_hand: bool = True, smart_retreat: bool = False,
+                 dig_when_undeveloped: bool = True):
         self._cards = None
         self._attacks = None
+        # Tweak (A/B'd): when the active can't attack, retreat to a clearly-more-charged bench
+        # attacker (addresses mid-game stalls). Conservatively gated — a naive version regressed.
+        self._smart_retreat = smart_retreat
+        # Tweak (A/B'd): when the board is undeveloped (no evolved attacker in play), keep digging
+        # for pieces even with a fuller hand — the real-ladder brick (lone Dreepy) sat passively.
+        self._dig_when_undeveloped = dig_when_undeveloped
+        self._dig_relax = False   # set per-decision in _run_turn_policy
         # Tweak (A/B'd): also skip draw-Abilities when the hand is already large (not just on deck-out)
         # — the traces showed hands bloating to 20+ via greedy ability draws, delaying commitment.
         self._gate_draw_abil_hand = gate_draw_abilities_by_hand
@@ -127,12 +135,25 @@ class HeuristicPolicy(Policy):
         me = obs.current.players[you]
         hand = me.hand or []
         hand_n, deck_n = me.handCount, me.deckCount
+        # "Undeveloped" = no evolved (Stage 1/2) Pokémon in play yet → keep digging for the line.
+        if self._dig_when_undeveloped:
+            in_play = list(me.active or []) + list(me.bench or [])
+            self._dig_relax = not any(
+                (c := self._cards.get(p.id)) and (c.stage1 or c.stage2) for p in in_play if p)
         for kind, _step in self._plan:
             matches = [i for i, o in enumerate(opts) if self._matches(kind, o, hand, hand_n, deck_n, me)]
             if matches:
                 return self._choose(kind, matches, opts, obs)
-        # No policy action available → end the turn (B-16). NOTE: naive smart-retreat here regressed
-        # the mean 83%→75% (A/B 2026-06-17) — it wastes energy without lookahead. Deferred to Phase 2.
+        # Can't act per policy. Conservative smart-retreat (A/B'd): only when the active CAN'T attack
+        # AND a bench Pokémon is clearly more charged (≥2 energy and more than the active) — i.e. a
+        # real attacker is waiting. The earlier naive "any bench has energy" version regressed.
+        if self._smart_retreat and not any(o.type == OptionType.ATTACK for o in opts):
+            retreats = [i for i, o in enumerate(opts) if o.type == OptionType.RETREAT]
+            if retreats:
+                active_e = len(me.active[0].energies) if (me.active and me.active[0]) else 0
+                best_bench_e = max((len(p.energies) for p in (me.bench or [])), default=0)
+                if best_bench_e >= 2 and best_bench_e > active_e:
+                    return retreats[0]
         for i, o in enumerate(opts):
             if o.type == OptionType.END:
                 return i
@@ -140,13 +161,15 @@ class HeuristicPolicy(Policy):
 
     def _matches(self, kind: str, o, hand, hand_n: int, deck_n: int, me) -> bool:
         t = o.type
+        draw_cap = (8 if self._dig_relax else DRAW_IF_HAND_AT_MOST)
+        search_cap = (8 if self._dig_relax else SEARCH_IF_HAND_AT_MOST)
         if kind == "draw_supporter":
-            if hand_n > DRAW_IF_HAND_AT_MOST or deck_n <= DECK_OUT_GUARD:
+            if hand_n > draw_cap or deck_n <= DECK_OUT_GUARD:
                 return False   # hand not low / would risk decking out (B-02, B-22)
             return t == OptionType.PLAY and self._card_of(o, hand) and \
                 self._card_of(o, hand).cardType == CardType.SUPPORTER
         if kind == "item_search":
-            if hand_n > SEARCH_IF_HAND_AT_MOST or deck_n <= DECK_OUT_GUARD:
+            if hand_n > search_cap or deck_n <= DECK_OUT_GUARD:
                 return False   # don't over-thin (B-05 "pieces you need", B-22)
             return t == OptionType.PLAY and self._card_of(o, hand) and \
                 self._card_of(o, hand).cardType == CardType.ITEM
