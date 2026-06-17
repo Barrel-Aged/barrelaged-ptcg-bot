@@ -11,10 +11,19 @@ from bot.policies.base import Policy
 from bot.policies.default_safe import DefaultSafePolicy
 
 
+def _default_policy() -> Policy:
+    """HeuristicPolicy when the engine (cg) is importable; else the always-legal DefaultSafePolicy."""
+    try:
+        from bot.policies.heuristic import HeuristicPolicy
+        return HeuristicPolicy()
+    except Exception:
+        return DefaultSafePolicy()
+
+
 class Agent:
     def __init__(self, policy: Policy | None = None, deck_path: str | None = None):
         self._deck = load_deck(deck_path)
-        self._policy = policy or DefaultSafePolicy()
+        self._policy = policy or _default_policy()
         self._budget = BudgetManager()
 
     def act(self, obs_dict: dict) -> list[int]:
