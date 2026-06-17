@@ -27,13 +27,20 @@ MCTS_CONTEXTS = {SelectContext.MAIN, SelectContext.ATTACK}  # where lookahead pa
 
 class MctsPolicy(Policy):
     def __init__(self, our_deck: list[int] | None = None, seed: int = 0,
-                 move_budget_s: float | None = None, min_samples: int = 20):
+                 move_budget_s: float | None = None, min_samples: int = 20,
+                 force_archetype: str | None = None, hedge: bool = True):
         self._heur = HeuristicPolicy()
         self._ident = DeckIdentifier(your_index=0)
         self._our_deck = our_deck
         self._rng = random.Random(seed)
         self._move_budget_s = move_budget_s   # hard per-move cap (overrides budget-derived deadline)
         self._min_samples = min_samples
+        # Ablation: if set, ignore the evidence and always determinize the opponent as this archetype
+        # (a "naive" baseline — e.g., always assume the meta-favorite). None = use the DeckIdentifier.
+        self._force_archetype = force_archetype
+        # G6.3: hedge across archetype uncertainty — sample a fresh archetype hypothesis per
+        # determinization weighted by the posterior (confident → mostly top-1; uncertain → mix).
+        self._hedge = hedge
 
     def set_deck(self, deck: list[int]) -> None:
         self._our_deck = deck
@@ -57,7 +64,17 @@ class MctsPolicy(Policy):
         n_actions = len(obs.select.option)
         totals = [0.0] * n_actions
         counts = [0] * n_actions
-        predicted = self._ident.predicted_deck()
+        # Determinization source: forced archetype (ablation), hedged sampling over the posterior
+        # (default), or evidence-based top-1.
+        arch_ids = weights = None
+        fixed_deck = None
+        if self._force_archetype is not None:
+            fixed_deck = self._ident.predicted_deck(self._force_archetype)
+        elif self._hedge:
+            post = self._ident.posterior()
+            arch_ids, weights = list(post.keys()), list(post.values())
+        else:
+            fixed_deck = self._ident.predicted_deck()
         if self._move_budget_s is not None:
             deadline = self._move_budget_s
         else:
@@ -66,6 +83,10 @@ class MctsPolicy(Policy):
         start = time.monotonic()
         iters = 0
         while time.monotonic() - start < deadline:
+            if fixed_deck is not None:
+                predicted = fixed_deck
+            else:   # hedge: sample a fresh archetype hypothesis weighted by the posterior
+                predicted = self._ident.predicted_deck(self._rng.choices(arch_ids, weights=weights)[0])
             kw = determinize(obs, self._our_deck, predicted, self._rng)
             root = search_begin(obs, **kw)
             for a in range(n_actions):
