@@ -1,0 +1,16 @@
+# Engine (provided by the competition Environment) — never commit
+cg/
+*.so
+*.dll
+
+# Large model checkpoints (keep code, not weights)
+models/*.pth
+models/*.pt
+models/*.bin
+
+# Build + Python
+submission.tar.gz
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
