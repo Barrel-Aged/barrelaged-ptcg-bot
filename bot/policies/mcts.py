@@ -28,7 +28,7 @@ MCTS_CONTEXTS = {SelectContext.MAIN, SelectContext.ATTACK}  # where lookahead pa
 class MctsPolicy(Policy):
     def __init__(self, our_deck: list[int] | None = None, seed: int = 0,
                  move_budget_s: float | None = None, min_samples: int = 20,
-                 force_archetype: str | None = None, hedge: bool = True):
+                 force_archetype: str | None = None, hedge: bool = False):
         self._heur = HeuristicPolicy()
         self._ident = DeckIdentifier(your_index=0)
         self._our_deck = our_deck
@@ -39,7 +39,9 @@ class MctsPolicy(Policy):
         # (a "naive" baseline — e.g., always assume the meta-favorite). None = use the DeckIdentifier.
         self._force_archetype = force_archetype
         # G6.3: hedge across archetype uncertainty — sample a fresh archetype hypothesis per
-        # determinization weighted by the posterior (confident → mostly top-1; uncertain → mix).
+        # determinization weighted by the posterior. DEFAULT OFF: ablation (2026-06-17) found it adds
+        # determinization variance that hurts flat-MC with few samples (worse than fixed top-1).
+        # Kept for future UCT/opponent-aware search where hidden-info modeling may pay off.
         self._hedge = hedge
 
     def set_deck(self, deck: list[int]) -> None:
