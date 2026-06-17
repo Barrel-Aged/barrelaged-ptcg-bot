@@ -72,10 +72,10 @@ def _effective_damage(base: int, attacker_type, defender_card) -> int:
 
 
 class HeuristicPolicy(Policy):
-    # NOTE: the default tweaks (gate_draw_abilities_by_hand, dig_when_undeveloped) are A/B-validated
-    # wins for AGGRO/MIDRANGE/SETUP decks (+11–15pt) but HURT CONTROL decks (slowking −17pt) — they
-    # bias toward committing/attacking. If piloting a control deck, construct with both = False.
-    def __init__(self, gate_draw_abilities_by_hand: bool = True, smart_retreat: bool = False,
+    # The default tweaks are A/B-validated wins (DECISIVE win-rate, draws excluded): anti-bloat,
+    # dig-when-undeveloped, conservative-retreat, promote-charged. Earlier "control regression" was a
+    # measurement artifact (control mirrors draw ~35% of games; win-rate must exclude draws).
+    def __init__(self, gate_draw_abilities_by_hand: bool = True, smart_retreat: bool = True,
                  dig_when_undeveloped: bool = True,
                  promote_charged: bool = True, smart_activate: bool = False):
         self._cards = None
