@@ -28,8 +28,15 @@ RULE_KIND = {
 KIND_PRECEDENCE = ["draw_supporter", "item_search", "bench", "evolve", "ability", "attach",
                    "stadium", "attack"]
 
+# Resource discipline (B-02 "if your hand is low", B-05 "pieces you need", B-22 "don't deck out",
+# B-11 "keep an out"). These conditions live in the turn_policy text; the interpreter now honors them.
+DRAW_IF_HAND_AT_MOST = 4      # only play a draw Supporter when the hand is actually low
+SEARCH_IF_HAND_AT_MOST = 5    # only search when we still need pieces (hand not already full)
+DECK_OUT_GUARD = 5            # below this deck count, stop drawing/thinning — running out loses
+
 _CARD_TABLE = None
 _ATTACK_TABLE = None
+_DRAW_ABILITY_IDS = None   # card IDs whose Ability text draws cards (deck-out risk when deck is low)
 
 
 def _step_kind(step: dict) -> str | None:
@@ -44,6 +51,19 @@ def _prize_value(card) -> int:
     return 3 if card.megaEx else 2 if card.ex else 1   # prizes the opponent takes on KO
 
 
+def _effective_damage(base: int, attacker_type, defender_card) -> int:
+    """Apply Weakness (×2) / Resistance (−30) — the prize-trade lever in the Mega era (H-31/H-35).
+    A heuristic estimate (the engine computes exact values incl. attack effects); good enough to
+    judge KOs and pick attacks/targets."""
+    dmg = base
+    if attacker_type is not None and defender_card is not None:
+        if defender_card.weakness is not None and defender_card.weakness == attacker_type:
+            dmg *= 2
+        if defender_card.resistance is not None and defender_card.resistance == attacker_type:
+            dmg = max(0, dmg - 30)
+    return dmg
+
+
 class HeuristicPolicy(Policy):
     def __init__(self):
         self._cards = None
@@ -52,10 +72,12 @@ class HeuristicPolicy(Policy):
         self._plan = [(k, s) for s in knowledge.turn_policy() if (k := _step_kind(s))]
 
     def _ensure_tables(self):
-        global _CARD_TABLE, _ATTACK_TABLE
+        global _CARD_TABLE, _ATTACK_TABLE, _DRAW_ABILITY_IDS
         if _CARD_TABLE is None:
             _CARD_TABLE = {c.cardId: c for c in all_card_data()}
             _ATTACK_TABLE = {a.attackId: a for a in all_attack()}
+            _DRAW_ABILITY_IDS = {c.cardId for c in _CARD_TABLE.values()
+                                 if any("draw" in (sk.text or "").lower() for sk in (c.skills or []))}
         self._cards, self._attacks = _CARD_TABLE, _ATTACK_TABLE
 
     # ---- dispatch ----------------------------------------------------------------------------
@@ -88,9 +110,11 @@ class HeuristicPolicy(Policy):
         """Walk turn_policy steps in file order; take the first available action (B-18 sequencing)."""
         opts = obs.select.option
         you = obs.current.yourIndex
-        hand = obs.current.players[you].hand or []
+        me = obs.current.players[you]
+        hand = me.hand or []
+        hand_n, deck_n = me.handCount, me.deckCount
         for kind, _step in self._plan:
-            matches = [i for i, o in enumerate(opts) if self._matches(kind, o, hand)]
+            matches = [i for i, o in enumerate(opts) if self._matches(kind, o, hand, hand_n, deck_n, me)]
             if matches:
                 return self._choose(kind, matches, opts, obs)
         # No policy step applies → end the turn (B-16: otherwise maximize setup and pass).
@@ -99,12 +123,16 @@ class HeuristicPolicy(Policy):
                 return i
         return 0
 
-    def _matches(self, kind: str, o, hand) -> bool:
+    def _matches(self, kind: str, o, hand, hand_n: int, deck_n: int, me) -> bool:
         t = o.type
         if kind == "draw_supporter":
+            if hand_n > DRAW_IF_HAND_AT_MOST or deck_n <= DECK_OUT_GUARD:
+                return False   # hand not low / would risk decking out (B-02, B-22)
             return t == OptionType.PLAY and self._card_of(o, hand) and \
                 self._card_of(o, hand).cardType == CardType.SUPPORTER
         if kind == "item_search":
+            if hand_n > SEARCH_IF_HAND_AT_MOST or deck_n <= DECK_OUT_GUARD:
+                return False   # don't over-thin (B-05 "pieces you need", B-22)
             return t == OptionType.PLAY and self._card_of(o, hand) and \
                 self._card_of(o, hand).cardType == CardType.ITEM
         if kind == "bench":
@@ -113,7 +141,13 @@ class HeuristicPolicy(Policy):
         if kind == "evolve":
             return t == OptionType.EVOLVE
         if kind == "ability":
-            return t == OptionType.ABILITY
+            if t != OptionType.ABILITY:
+                return False
+            if deck_n <= DECK_OUT_GUARD:        # B-22: don't fire a draw-Ability into a deck-out
+                cid = self._board_card_id(o, me)
+                if cid is not None and cid in _DRAW_ABILITY_IDS:
+                    return False
+            return True
         if kind == "attach":
             return t == OptionType.ATTACH
         if kind == "stadium":
@@ -134,20 +168,27 @@ class HeuristicPolicy(Policy):
         return matches[0]
 
     # ---- attacks / targeting -----------------------------------------------------------------
+    def _my_active_type(self, obs):
+        me = obs.current.players[obs.current.yourIndex]
+        if me.active and me.active[0] and me.active[0].id in self._cards:
+            return self._cards[me.active[0].id].energyType
+        return None
+
     def _best_attack(self, obs, restrict=None) -> int:
         opp = obs.current.players[1 - obs.current.yourIndex]
+        opp_card = self._cards.get(opp.active[0].id) if (opp.active and opp.active[0]) else None
         opp_hp = opp.active[0].hp if (opp.active and opp.active[0]) else None
-        opp_val = _prize_value(self._cards[opp.active[0].id]) if (opp.active and opp.active[0]
-                                                                  and opp.active[0].id in self._cards) else 1
-        idxs = restrict if restrict is not None else range(len(obs.select.option))
-        best_i, best_s = (idxs[0] if restrict else 0), float("-inf")
+        opp_val = _prize_value(opp_card) if opp_card else 1
+        atk_type = self._my_active_type(obs)
+        idxs = list(restrict) if restrict is not None else list(range(len(obs.select.option)))
+        best_i, best_s = idxs[0], float("-inf")
         for i in idxs:
             o = obs.select.option[i]
             atk = self._attacks.get(o.attackId) if o.attackId is not None else None
-            dmg = atk.damage if atk else 0
-            s = dmg
-            if opp_hp is not None and dmg >= opp_hp:
-                s += 120 + 60 * opp_val   # KO bonus, scaled by prizes taken (B-15)
+            eff = _effective_damage(atk.damage if atk else 0, atk_type, opp_card)
+            s = eff
+            if opp_hp is not None and eff >= opp_hp:
+                s += 120 + 60 * opp_val   # KO bonus, scaled by prizes taken (B-15/H-31)
             if s > best_s:
                 best_i, best_s = i, s
         return best_i
@@ -184,6 +225,16 @@ class HeuristicPolicy(Policy):
         if o.index is not None and o.index < len(hand):
             return self._cards.get(hand[o.index].id)
         return None
+
+    @staticmethod
+    def _board_card_id(o, me):
+        """Resolve the CardData id of an in-play option (Ability) from its area/index."""
+        poke = None
+        if o.area == AreaType.ACTIVE and me.active:
+            poke = me.active[0]
+        elif o.area == AreaType.BENCH and o.index is not None and o.index < len(me.bench):
+            poke = me.bench[o.index]
+        return poke.id if poke else None
 
     @staticmethod
     def _counted(sel, ranked: list[int]) -> list[int]:
