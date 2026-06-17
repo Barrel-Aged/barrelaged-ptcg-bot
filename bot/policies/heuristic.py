@@ -41,6 +41,11 @@ _ATTACK_TABLE = None
 _DRAW_ABILITY_IDS = None   # card IDs whose Ability text draws cards (deck-out risk when deck is low)
 
 
+def _safe_typed(sel) -> list[int]:
+    """Always-legal selection from a typed SelectData: the first maxCount option indices."""
+    return list(range(int(sel.maxCount)))
+
+
 def _step_kind(step: dict) -> str | None:
     kinds = {RULE_KIND[r] for r in step.get("rules", []) if r in RULE_KIND}
     for k in KIND_PRECEDENCE:
@@ -83,13 +88,17 @@ class HeuristicPolicy(Policy):
         self._cards, self._attacks = _CARD_TABLE, _ATTACK_TABLE
 
     # ---- dispatch ----------------------------------------------------------------------------
-    def select(self, obs_dict: dict, budget) -> list[int]:
+    def select(self, obs_dict: dict, budget=None) -> list[int]:
         self._ensure_tables()
-        obs = to_observation_class(obs_dict)
+        return self.select_typed(to_observation_class(obs_dict))
+
+    def select_typed(self, obs) -> list[int]:
+        """Decide from an already-typed Observation (used by MCTS rollouts over the Search API)."""
+        self._ensure_tables()
         sel = obs.select
         ctx = sel.context
         if not sel.option:
-            return safe_selection(obs_dict["select"])
+            return _safe_typed(sel)
 
         if ctx == SelectContext.MAIN:
             return [self._run_turn_policy(obs)]
@@ -105,7 +114,7 @@ class HeuristicPolicy(Policy):
             return self._counted(sel, self._rank_targets(obs))   # B-15: hit 2-prize targets
         if ctx == SelectContext.DRAW_COUNT:
             return [self._max_number(sel.option)]
-        return safe_selection(obs_dict["select"])
+        return _safe_typed(sel)
 
     # ---- the turn_policy interpreter ---------------------------------------------------------
     def _run_turn_policy(self, obs) -> int:
