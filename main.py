@@ -9,8 +9,16 @@ rollouts). Falls back to the heuristic / always-legal policy if the engine or MC
 import os
 import sys
 
-# Make `bot` and the bundled `cg` importable whether run from CWD or /kaggle_simulations/agent/.
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+# Make `bot` and the bundled `cg` importable. The eval harness exec()s this file (so `__file__` is
+# undefined — guard it) and runs with CWD = the agent dir (/kaggle_simulations/agent/).
+_paths = [os.getcwd(), "/kaggle_simulations/agent"]
+try:
+    _paths.append(os.path.dirname(os.path.abspath(__file__)))
+except NameError:
+    pass
+for _p in _paths:
+    if _p and _p not in sys.path:
+        sys.path.insert(0, _p)
 
 from bot.agent import Agent  # noqa: E402
 from bot.engine_io import load_deck  # noqa: E402
