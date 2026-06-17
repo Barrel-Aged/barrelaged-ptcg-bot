@@ -77,7 +77,7 @@ class HeuristicPolicy(Policy):
     # bias toward committing/attacking. If piloting a control deck, construct with both = False.
     def __init__(self, gate_draw_abilities_by_hand: bool = True, smart_retreat: bool = False,
                  dig_when_undeveloped: bool = True,
-                 promote_charged: bool = False):
+                 promote_charged: bool = True, smart_activate: bool = False):
         self._cards = None
         self._attacks = None
         # Tweak (A/B'd): when the active can't attack, retreat to a clearly-more-charged bench
@@ -90,7 +90,8 @@ class HeuristicPolicy(Policy):
         # Tweak (A/B'd): also skip draw-Abilities when the hand is already large (not just on deck-out)
         # — the traces showed hands bloating to 20+ via greedy ability draws, delaying commitment.
         self._gate_draw_abil_hand = gate_draw_abilities_by_hand
-        self._promote_charged = promote_charged   # A/B: promote the most-charged attacker
+        self._promote_charged = promote_charged
+        self._smart_activate = smart_activate   # A/B: activate beneficial effects (YES)
         # Precompute the ordered (kind, step) plan once from the knowledge base.
         self._plan = [(k, s) for s in knowledge.turn_policy() if (k := _step_kind(s))]
 
@@ -130,6 +131,13 @@ class HeuristicPolicy(Policy):
             return self._counted(sel, self._rank_targets(obs))   # B-15: hit 2-prize targets
         if ctx == SelectContext.DRAW_COUNT:
             return [self._max_number(sel.option)]
+        # Beneficial yes/no: activate your own effects, call heads. (A/B'd.)
+        if self._smart_activate and ctx in (SelectContext.ACTIVATE, SelectContext.FIRST_EFFECT,
+                                            SelectContext.COIN_HEAD):
+            want = OptionType.YES
+            for i, o in enumerate(sel.option):
+                if o.type == want:
+                    return [i]
         return _safe_typed(sel)
 
     # ---- the turn_policy interpreter ---------------------------------------------------------

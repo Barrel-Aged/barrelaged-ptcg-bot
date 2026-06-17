@@ -64,15 +64,23 @@ def run_arm(name: str, hero_factory, opp_factory, opp_deck, hero_deck, games: in
     return wins, draws, len(scores)
 
 
+def decisive(wins: int, draws: int, n: int) -> tuple[int, int]:
+    """Reduce to decisive games (exclude draws) — win-rate must be measured among games that had a
+    winner, else high-draw decks (control mirrors) read ~30% even for identical arms."""
+    return wins, max(1, n - draws)
+
+
 def compare(label_a, fac_a, label_b, fac_b, opp_factory, opp_deck, hero_deck,
             games: int = 120, workers: int | None = None) -> dict:
-    """Run two arms vs the same opponent; report win-rates + 95% CIs + whether they separate."""
+    """Run two arms vs the same opponent; report DECISIVE win-rates + 95% CIs (draws excluded)."""
     workers = workers or max(1, mp.cpu_count() - 2)
     wa, da, na = run_arm(label_a, fac_a, opp_factory, opp_deck, hero_deck, games, workers)
     wb, db, nb = run_arm(label_b, fac_b, opp_factory, opp_deck, hero_deck, games, workers)
-    pa, pb = wa / na, wb / nb
-    loa, hia = wilson_ci(wa, na)
-    lob, hib = wilson_ci(wb, nb)
+    wa_d, na_d = decisive(wa, da, na)
+    wb_d, nb_d = decisive(wb, db, nb)
+    pa, pb = wa_d / na_d, wb_d / nb_d
+    loa, hia = wilson_ci(wa_d, na_d)
+    lob, hib = wilson_ci(wb_d, nb_d)
     separated = hia < lob or hib < loa
     return {"a": (label_a, pa, loa, hia, wa, na), "b": (label_b, pb, lob, hib, wb, nb),
             "delta": pa - pb, "significant": separated}
