@@ -106,6 +106,13 @@
       ]
     }
   ],
+  "resource_policy": {
+    "description": "Numeric thresholds for the resource-discipline conditions the turn_policy references (B-02 'if hand low', B-05 'pieces you need', B-11 'keep an out', B-22 'don't deck out'). The agent loads these so tuning lives here, not in code.",
+    "draw_supporter_if_hand_at_most": 4,
+    "search_if_hand_at_most": 5,
+    "deck_out_guard": 5,
+    "rules": ["B-02", "B-05", "B-11", "B-22"]
+  },
   "rules": [
     {
       "id": "B-01",

@@ -28,11 +28,13 @@ RULE_KIND = {
 KIND_PRECEDENCE = ["draw_supporter", "item_search", "bench", "evolve", "ability", "attach",
                    "stadium", "attack"]
 
-# Resource discipline (B-02 "if your hand is low", B-05 "pieces you need", B-22 "don't deck out",
-# B-11 "keep an out"). These conditions live in the turn_policy text; the interpreter now honors them.
-DRAW_IF_HAND_AT_MOST = 4      # only play a draw Supporter when the hand is actually low
-SEARCH_IF_HAND_AT_MOST = 5    # only search when we still need pieces (hand not already full)
-DECK_OUT_GUARD = 5            # below this deck count, stop drawing/thinning — running out loses
+# Resource-discipline thresholds (B-02 "if hand low", B-05 "pieces you need", B-11 "keep an out",
+# B-22 "don't deck out") are loaded from heuristics_beginner.json's resource_policy — tuning lives in
+# the knowledge base, not in code.
+_RP = knowledge.resource_policy()
+DRAW_IF_HAND_AT_MOST = _RP["draw_supporter_if_hand_at_most"]
+SEARCH_IF_HAND_AT_MOST = _RP["search_if_hand_at_most"]
+DECK_OUT_GUARD = _RP["deck_out_guard"]
 
 _CARD_TABLE = None
 _ATTACK_TABLE = None

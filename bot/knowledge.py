@@ -47,3 +47,14 @@ def opening_policy() -> list[dict]:
 def rules_index() -> dict[str, dict]:
     """B-rule id -> {title, rule, why, priority, maps_to}."""
     return {r["id"]: r for r in beginner().get("rules", [])}
+
+
+def resource_policy() -> dict:
+    """Numeric thresholds for resource discipline (B-02/B-05/B-11/B-22). Falls back to safe
+    defaults if the knowledge file predates the block."""
+    rp = beginner().get("resource_policy", {})
+    return {
+        "draw_supporter_if_hand_at_most": rp.get("draw_supporter_if_hand_at_most", 4),
+        "search_if_hand_at_most": rp.get("search_if_hand_at_most", 5),
+        "deck_out_guard": rp.get("deck_out_guard", 5),
+    }
