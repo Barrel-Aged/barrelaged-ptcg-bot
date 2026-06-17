@@ -117,7 +117,8 @@ class HeuristicPolicy(Policy):
             matches = [i for i, o in enumerate(opts) if self._matches(kind, o, hand, hand_n, deck_n, me)]
             if matches:
                 return self._choose(kind, matches, opts, obs)
-        # No policy step applies → end the turn (B-16: otherwise maximize setup and pass).
+        # No policy action available → end the turn (B-16). NOTE: naive smart-retreat here regressed
+        # the mean 83%→75% (A/B 2026-06-17) — it wastes energy without lookahead. Deferred to Phase 2.
         for i, o in enumerate(opts):
             if o.type == OptionType.END:
                 return i
