@@ -22,8 +22,8 @@ from bot.policies.mcts import MctsPolicy
 
 
 # ---- picklable policy builders (module-level → safe for spawn) --------------------------------
-def make_heuristic():
-    return HeuristicPolicy()
+def make_heuristic(**kw):
+    return HeuristicPolicy(**kw)
 
 
 def make_mcts(deck, n_iterations=20, force_archetype=None, hedge=False, seed=0):

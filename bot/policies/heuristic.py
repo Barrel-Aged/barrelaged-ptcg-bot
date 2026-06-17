@@ -72,9 +72,12 @@ def _effective_damage(base: int, attacker_type, defender_card) -> int:
 
 
 class HeuristicPolicy(Policy):
-    def __init__(self):
+    def __init__(self, gate_draw_abilities_by_hand: bool = True):
         self._cards = None
         self._attacks = None
+        # Tweak (A/B'd): also skip draw-Abilities when the hand is already large (not just on deck-out)
+        # — the traces showed hands bloating to 20+ via greedy ability draws, delaying commitment.
+        self._gate_draw_abil_hand = gate_draw_abilities_by_hand
         # Precompute the ordered (kind, step) plan once from the knowledge base.
         self._plan = [(k, s) for s in knowledge.turn_policy() if (k := _step_kind(s))]
 
@@ -155,7 +158,8 @@ class HeuristicPolicy(Policy):
         if kind == "ability":
             if t != OptionType.ABILITY:
                 return False
-            if deck_n <= DECK_OUT_GUARD:        # B-22: don't fire a draw-Ability into a deck-out
+            # Skip draw-Abilities on deck-out risk (B-22) or — if the tweak is on — a bloated hand.
+            if deck_n <= DECK_OUT_GUARD or (self._gate_draw_abil_hand and hand_n > DRAW_IF_HAND_AT_MOST):
                 cid = self._board_card_id(o, me)
                 if cid is not None and cid in _DRAW_ABILITY_IDS:
                     return False
