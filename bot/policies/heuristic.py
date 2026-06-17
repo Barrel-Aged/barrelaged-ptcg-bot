@@ -73,7 +73,8 @@ def _effective_damage(base: int, attacker_type, defender_card) -> int:
 
 class HeuristicPolicy(Policy):
     def __init__(self, gate_draw_abilities_by_hand: bool = True, smart_retreat: bool = False,
-                 dig_when_undeveloped: bool = True):
+                 dig_when_undeveloped: bool = True,
+                 promote_charged: bool = False):
         self._cards = None
         self._attacks = None
         # Tweak (A/B'd): when the active can't attack, retreat to a clearly-more-charged bench
@@ -86,6 +87,7 @@ class HeuristicPolicy(Policy):
         # Tweak (A/B'd): also skip draw-Abilities when the hand is already large (not just on deck-out)
         # — the traces showed hands bloating to 20+ via greedy ability draws, delaying commitment.
         self._gate_draw_abil_hand = gate_draw_abilities_by_hand
+        self._promote_charged = promote_charged   # A/B: promote the most-charged attacker
         # Precompute the ordered (kind, step) plan once from the knowledge base.
         self._plan = [(k, s) for s in knowledge.turn_policy() if (k := _step_kind(s))]
 
@@ -241,13 +243,20 @@ class HeuristicPolicy(Policy):
         return [i for _, i in scored]
 
     def _rank_attacker(self, obs) -> list[int]:
-        """H-33: promote the best attacker (highest HP as a threat proxy; 2-prize is fine here)."""
+        """H-33: promote the best attacker. With promote_charged, prefer the most-CHARGED Pokémon
+        (energy attached) so the new active can actually attack next turn, then HP."""
+        me = obs.current.players[obs.current.yourIndex]
+        bench = me.bench or []
         scored = []
         for i, o in enumerate(obs.select.option):
             c = self._cards.get(o.cardId) if o.cardId is not None else None
-            scored.append((c.hp if c else 0, i))
+            energy = 0
+            if self._promote_charged and o.area == AreaType.BENCH and o.index is not None \
+                    and o.index < len(bench):
+                energy = len(bench[o.index].energies)
+            scored.append((energy, c.hp if c else 0, i))
         scored.sort(reverse=True)
-        return [i for _, i in scored]
+        return [i for *_, i in scored]
 
     def _rank_bench(self, obs) -> list[int]:
         """H-37/H-32/B-09: prefer single-prize benchers (less prize liability), HP as tiebreak."""
