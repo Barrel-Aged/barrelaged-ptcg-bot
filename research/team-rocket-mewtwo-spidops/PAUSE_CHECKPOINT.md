@@ -45,3 +45,12 @@ If development resumes, start with the detailed
 `methodology/PAUSED_DECK_REWORK_REVISIT_NOTE.md`, wait for a mature arena sample,
 and continue the Wobbuffet-free deck search rather than restoring Wobbuffet.
 
+## GitHub publication
+
+The 742-file, 8,138,811-byte publication snapshot was posted to the existing
+private competition repository as draft PR
+<https://github.com/Barrel-Aged/barrelaged-ptcg-bot/pull/1> on branch
+`agent/publish-mewtwo-spidops-research`. The initial publication commit was
+`cb4c0e3aa459c2cc6c906faef39740010940c521`; a follow-up checkpoint-only commit
+records this link. Critical remote blobs were compared with local Git object
+hashes and matched byte-for-byte.

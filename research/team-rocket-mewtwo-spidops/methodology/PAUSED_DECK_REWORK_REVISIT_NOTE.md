@@ -3,7 +3,7 @@
 Status: **paused by user; no active deck work**  
 Originally recorded: 2026-08-01  
 Final pause checkpoint: 2026-08-05 (after the Articuno V7 internal-arena
-submission and GitHub publication snapshot preparation)
+submission and private GitHub draft-PR publication)
 
 The subsequent Target-80 effort produced the immutable Wobbuffet-free V6 and,
 in the final authorized pass, `HelbrosRocketSpidopsArticunoV7`. V7 was accepted
@@ -706,8 +706,11 @@ Do not rerun these unchanged merely because the project has restarted:
   `work/target80_candidates/hancang_wobbfree_elite_articuno_v7/`,
   `work/HelbrosRocketSpidopsArticunoV7.tar.gz`, and
   `work/target80_candidates/hancang_wobbfree_elite_articuno_v7/FINAL_ITERATION_PROVENANCE.json`
-- publication-safe GitHub snapshot prepared locally:
-  `publication/team-rocket-mewtwo-spidops-research/`
+- publication-safe snapshot and private GitHub draft PR:
+  `publication/team-rocket-mewtwo-spidops-research/`, branch
+  `agent/publish-mewtwo-spidops-research`, commit
+  `cb4c0e3aa459c2cc6c906faef39740010940c521`, and
+  `https://github.com/Barrel-Aged/barrelaged-ptcg-bot/pull/1`
 
 No local monitor, evaluation, training, packaging, submission, or publishing
 process should be considered active after this checkpoint. The Target-80
