@@ -1,0 +1,36 @@
+{
+  "schema": "rocket-spidops-final-iteration-provenance/v1",
+  "created_local": "2026-08-05",
+  "candidate_name": "HelbrosRocketSpidopsArticunoV7",
+  "source_candidate": "hancang_wobbfree_elite_bc_v1r_selected",
+  "deck_sha256": "0bb258484e5638f3c51ac45def50fc2a1056feb20d27bd3842266514c8e109d8",
+  "model_sha256": "b4a361f42900629df28da9029e5193753344f71bc8806748b971cb551bfb674f",
+  "main_sha256": "d690d9f316180ebd87f5648257deacbaaf8a9bb7bd50a5231ed8b128f6be2484",
+  "deck_library_sha256": "ed56d55cec6e2a87415db422b72f16baa8ab552e87c625de75cd0d8cb7e8d4e0",
+  "deck_size": 60,
+  "wobbuffet_count": 0,
+  "admitted_changes": [
+    "Frozen exact-deck elite ScaleBC model selected before this iteration",
+    "Existing early Poke Pad to missing Spidops guard",
+    "Existing Brave Bangle exact-lethal guard",
+    "Public-information, matchup-conditioned Articuno fifth-bench-slot reservation"
+  ],
+  "rejected_changes": [
+    "Joltik and Galvantula package",
+    "Team Rocket's Zapdos and Maximum Belt package",
+    "Raw-action sampled teacher V1R"
+  ],
+  "articuno_guard_scope": {
+    "information": "own private hand plus public current state only",
+    "activation": "four occupied bench slots, no Articuno in play, and a publicly revealed attack-effect family",
+    "forced_action": "play Articuno when legal",
+    "masked_actions": "only duplicate Mewtwo ex, duplicate Mimikyu, or fourth Tarountula Basic plays",
+    "explicit_non_trigger": "damage-only effects such as Mega Starmie's Jetting Blow"
+  },
+  "validation": [
+    "Python compile passed",
+    "Six deterministic Articuno reservation assertions passed",
+    "One official-engine terminal smoke game passed against AshV178MarnieFullBest"
+  ],
+  "performance_claim": "No arena strength claim is made by this provenance file."
+}

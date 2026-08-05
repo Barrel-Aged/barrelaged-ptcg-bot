@@ -1,0 +1,15 @@
+{
+  "schema": "target80-raw-action-source-provenance/v1",
+  "created_at": "2026-08-05",
+  "purpose": "Immutable zero-Wobbuffet source policy for paired critical-root raw-action supervision",
+  "deck_source": "work/target80_candidates/hancang_wobbfree_scale_control_v1/deck.csv",
+  "deck_sha256": "0bb258484e5638f3c51ac45def50fc2a1056feb20d27bd3842266514c8e109d8",
+  "main_source": "work/target80_candidates/hancang_wobbfree_scale_control_v1/main.py",
+  "main_sha256": "3072e57ea576443365368926145645954854c9a340ef3ca5e729180a4ec4d341",
+  "model_source": "work/target80_exact_deck_elite_bc_v1r_seed806051/iteration_03.pt",
+  "model_sha256": "b4a361f42900629df28da9029e5193753344f71bc8806748b971cb551bfb674f",
+  "source_training_report": "work/target80_exact_deck_elite_bc_v1r_seed806051/training_report.json",
+  "source_training_status": "research-only selected checkpoint; rejected for direct deployment by its locked strength gates",
+  "deployment_authority": false,
+  "wobbuffet_count": 0
+}

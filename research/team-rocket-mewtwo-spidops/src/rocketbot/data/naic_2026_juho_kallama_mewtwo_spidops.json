@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "deck_name": "Team Rocket's Mewtwo ex / Spidops",
+  "player": "Juho Kallama",
+  "event": "NAIC 2026",
+  "placing": 7,
+  "provenance": "User-supplied transcription of Juho Kallama's 7th-place NAIC 2026 Team Rocket box list.",
+  "entries": [
+    {"category": "pokemon", "name": "Team Rocket's Mewtwo ex", "count": 2},
+    {"category": "pokemon", "name": "Team Rocket's Tarountula", "count": 4},
+    {"category": "pokemon", "name": "Team Rocket's Spidops", "count": 4},
+    {"category": "pokemon", "name": "Team Rocket's Articuno", "count": 2},
+    {"category": "pokemon", "name": "Team Rocket's Mimikyu", "count": 2},
+    {"category": "pokemon", "name": "Lillie's Clefairy ex", "count": 1},
+
+    {"category": "trainer", "name": "Lillie's Determination", "count": 4},
+    {"category": "trainer", "name": "Team Rocket's Ariana", "count": 4},
+    {"category": "trainer", "name": "Team Rocket's Giovanni", "count": 3},
+    {"category": "trainer", "name": "Team Rocket's Proton", "count": 2},
+    {"category": "trainer", "name": "Team Rocket's Petrel", "count": 1},
+    {"category": "trainer", "name": "Team Rocket's Transceiver", "count": 4},
+    {"category": "trainer", "name": "Ultra Ball", "count": 4},
+    {"category": "trainer", "name": "Night Stretcher", "count": 3},
+    {"category": "trainer", "name": "Bug Catching Set", "count": 2},
+    {"category": "trainer", "name": "Lucky Helmet", "count": 2},
+    {"category": "trainer", "name": "Prism Tower", "count": 2},
+    {"category": "trainer", "name": "Team Rocket's Factory", "count": 1},
+    {"category": "trainer", "name": "Energy Switch", "count": 1},
+    {"category": "trainer", "name": "Maximum Belt", "count": 1},
+
+    {"category": "energy", "name": "Team Rocket's Energy", "count": 4},
+    {"category": "energy", "name": "Basic Grass Energy", "count": 6},
+    {"category": "energy", "name": "Basic Psychic Energy", "count": 1}
+  ]
+}
