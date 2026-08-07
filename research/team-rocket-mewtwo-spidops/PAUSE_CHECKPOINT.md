@@ -56,8 +56,9 @@ already proven optimal.
 
 ## GitHub publication
 
-This updated publication snapshot is intended for the existing private draft
-PR <https://github.com/Barrel-Aged/barrelaged-ptcg-bot/pull/1> on branch
-`agent/publish-mewtwo-spidops-research`. The original publication commit was
-`cb4c0e3aa459c2cc6c906faef39740010940c521`; the V8 publication commit is
-recorded after the remote push completes.
+The updated snapshot is published in the existing private draft PR
+<https://github.com/Barrel-Aged/barrelaged-ptcg-bot/pull/1> on branch
+`agent/publish-mewtwo-spidops-research`. It contains 748 changed files relative
+to the repository base. Sixteen final/new remote blobs were compared with the
+local Git object hashes and matched exactly; the documented private and
+third-party exclusions remain absent.
