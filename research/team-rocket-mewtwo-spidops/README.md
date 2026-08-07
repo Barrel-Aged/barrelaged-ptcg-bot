@@ -6,16 +6,18 @@ latents, six strategic value heads, state-conditioned value aggregation,
 autoregressive tactical actions, opponent-plan and range abstractions,
 selective search, search-guided learning, and a game-theoretic planning pivot.
 
-Development was paused on 2026-08-05 after submitting one final internal-arena
-iteration, `HelbrosRocketSpidopsArticunoV7`. That bot uses the strongest frozen
-zero-Wobbuffet checkpoint retained by the experiments, the previously admitted
-early-Spidops and exact-lethal guards, and a narrow public-information Articuno
-bench-slot reservation. Its arena package SHA-256 is
-`8858324f993656691caa59700b968b88390e3edce94068df8dfb5cf28e455289`.
+Development was paused on 2026-08-06 after submitting one post-V7 internal-
+arena iteration, `HelbrosRocketSpidopsBC2RecoveryV8`. The final bot restores
+the exact ScaleBCV2/V5 deck and neural checkpoint, retains the admitted early-
+Spidops and exact-lethal guards, reserves the fifth bench slot for Articuno in
+publicly identified effect-attack matchups, and redirects only selected
+Wobbuffet Headbutt Bounce actions when a ready Spidops retreat is offered. Its
+arena package SHA-256 is
+`876ac11a1878267251844fad2fcae11fcad96f32a8f5b403ab16521e2c335e12`.
 
 No claim of superhuman strength, an 80% arena win rate, exploitability bounds,
-or equilibrium convergence is made. The final arena estimate was pending when
-development paused.
+or equilibrium convergence is made. The first read-only arena snapshot was
+8-3 and is far too small to be a mature strength estimate.
 
 ## Start here
 
@@ -32,6 +34,9 @@ development paused.
   are different artifacts.
 - [`methodology/PAUSED_DECK_REWORK_REVISIT_NOTE.md`](methodology/PAUSED_DECK_REWORK_REVISIT_NOTE.md)
   is the detailed continuation checkpoint.
+- [`methodology/BC2_RECOVERY_V8_SUBMISSION_AND_PAUSE.md`](methodology/BC2_RECOVERY_V8_SUBMISSION_AND_PAUSE.md)
+  gives the final diagnosis, rejected zero-Wobbuffet arm, verification, hashes,
+  submission acknowledgement, and pause boundary.
 - [`arena_bot/README.md`](arena_bot/README.md) documents the final submitted
   wrapper, deck, guards, hashes, and runtime boundary.
 
@@ -73,4 +78,3 @@ and hashes.
 Pokemon and related names are trademarks of their respective owners. This is
 an independent research project and is not affiliated with or endorsed by The
 Pokemon Company, Nintendo, Creatures, or Game Freak.
-
