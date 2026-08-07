@@ -105,3 +105,14 @@ Development is paused after this submission and publication handoff. Do not
 start another local experiment, arena identity, monitor, training run, Kaggle
 submission, or deck mutation without a new user request. The arena may continue
 to schedule the immutable V8 identity.
+
+## GitHub handoff
+
+The publication-safe source and methodology snapshot was updated on branch
+`agent/publish-mewtwo-spidops-research` in the existing private draft PR:
+<https://github.com/Barrel-Aged/barrelaged-ptcg-bot/pull/1>. The PR now contains
+748 changed files relative to its empty research base. Sixteen final/new remote
+blobs were compared with the local Git object hashes and matched exactly. The
+official engine, packaged third-party runtime, model binary, opponent priors,
+private telemetry/replays, credentials, and submitted archive remain excluded
+under `PUBLICATION_BOUNDARY.md`.
