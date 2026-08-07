@@ -2,8 +2,31 @@
 
 Status: **paused by user; no active deck work**  
 Originally recorded: 2026-08-01  
-Final pause checkpoint: 2026-08-05 (after the Articuno V7 internal-arena
-submission and private GitHub draft-PR publication)
+Latest pause checkpoint: 2026-08-06 (after the BC2 Recovery V8 internal-arena
+submission and GitHub publication update)
+
+## 2026-08-06 superseding checkpoint
+
+`HelbrosRocketSpidopsBC2RecoveryV8` is the final submitted identity. It
+restores the byte-exact ScaleBCV2/V5 deck and model, retains the early-Spidops
+and exact-lethal Bangle guards, adds the public-information Articuno bench-slot
+reservation, and constrains only selected Wobbuffet Headbutt Bounce actions.
+The accepted archive and full claims boundary are recorded in
+`BC2_RECOVERY_V8_SUBMISSION_AND_PAUSE.md`.
+
+The earlier zero-Wobbuffet restart requirement below is now historical rather
+than mandatory. A preregistered third-Murkrow removal arm went 14-10 against
+both V5 and V7 but failed 0-4 against Marnie and 0-4 against Starmie, so it was
+not submitted. Future work may still pursue a zero-Wobbuffet package, but it
+must freeze and train a coherent exact-deck policy and pass those matchup
+gates; do not treat a blind removal as an already validated improvement.
+
+No local monitor, evaluation, training, packaging, submission, or GitHub job
+should be considered active after the V8 publication handoff. Do not submit to
+Kaggle unless separately requested.
+
+The first read-only live V8 snapshot was 8-3 at rating 778.4. Treat this only
+as proof of promotion and execution; it is not a mature strength estimate.
 
 The subsequent Target-80 effort produced the immutable Wobbuffet-free V6 and,
 in the final authorized pass, `HelbrosRocketSpidopsArticunoV7`. V7 was accepted
@@ -12,7 +35,7 @@ for this pause. The user has now paused the deck again. Do not silently restart
 collection, training, evaluation, packaging, arena submission, GitHub
 publication, or Kaggle work.
 
-## Mandatory restart brief
+## Historical 2026-08-05 restart brief (superseded above)
 
 If this deck project is revisited, begin with a **deck-level rebuild that
 removes Wobbuffet**. The user's explicit direction is to find a higher-value
