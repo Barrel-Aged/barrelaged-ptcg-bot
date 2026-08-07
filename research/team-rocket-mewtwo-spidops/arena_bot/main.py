@@ -1,4 +1,11 @@
-"""Wobbuffet-free ScaleBC policy with validated tactical and board guards."""
+"""Exact BCv2 recovery policy with narrow tactical and board guards.
+
+The frozen BCv2 deck and neural blueprint are byte-identical to V5. The runtime
+retains the admitted early-Spidops and exact-lethal Bangle guards, adds a
+public-information Articuno fifth-bench-slot reservation, and redirects only a
+selected Wobbuffet Headbutt Bounce when an offered retreat leads to a ready
+Benched Spidops. Rocket Mirror is never intercepted.
+"""
 from __future__ import annotations
 
 import os
@@ -48,11 +55,19 @@ SPIDOPS = 401
 ARTICUNO = 414
 MEWTWO_EX = 431
 MIMIKYU = 434
+MURKROW = 463
+WOBBUFFET = 432
 BRAVE_BANGLE = 1175
 ROCKET_RUSH = 560
+HEADBUTT_BOUNCE = 610
+TEAM_ROCKET_ENERGY = 15
+GRASS_ENERGY = 1
 OPTION_PLAY = 7
+OPTION_RETREAT = 12
 OPTION_ATTACK = 13
 OPTION_END = 14
+
+_TEAM_ROCKET_POKEMON = frozenset({400, 401, 414, 431, 432, 463})
 
 
 # Repelling Veil stops effects of attacks done to Basic Team Rocket Pokemon,
@@ -199,8 +214,9 @@ def _articuno_bench_plan(observation: dict):
     The guard is deliberately narrow: it activates at four occupied bench
     slots, only after the opponent publicly reveals an attack-effect family,
     and only while no Articuno is already in play.  If Articuno is available it
-    is played.  Otherwise, the fifth slot is withheld only from a duplicate
-    Mewtwo/Mimikyu or a fourth Tarountula; core setup plays remain available.
+    is played. Otherwise, the fifth slot is withheld only from a lower-priority
+    Wobbuffet or a redundant Mewtwo, Mimikyu, third Murkrow, or fourth
+    Tarountula; core setup plays remain available.
     """
     select = observation.get("select") or {}
     current = observation.get("current") or {}
@@ -240,6 +256,10 @@ def _articuno_bench_plan(observation: dict):
             continue
         if card_id in (MEWTWO_EX, MIMIKYU) and card_id in board_ids:
             forbidden.add(option_index)
+        elif card_id == WOBBUFFET:
+            forbidden.add(option_index)
+        elif card_id == MURKROW and board_ids.count(MURKROW) >= 2:
+            forbidden.add(option_index)
         elif card_id == TAROUNTULA and board_ids.count(TAROUNTULA) >= 3:
             forbidden.add(option_index)
     return None, frozenset(forbidden)
@@ -255,6 +275,82 @@ def _fallback_allowed_action(select: dict, allowed: list[int]):
         if options[index].get("type") != OPTION_END:
             return [index]
     return [allowed[0]]
+
+
+def _board(player: dict) -> list[dict]:
+    return [
+        card
+        for card in list(player.get("active") or []) + list(player.get("bench") or [])
+        if isinstance(card, dict)
+    ]
+
+
+def _energy_supply(card: dict) -> tuple[int, int]:
+    """Return total Energy units and Grass units from public in-play state."""
+    expanded = card.get("energies")
+    if isinstance(expanded, list) and expanded:
+        return len(expanded), sum(int(energy) == GRASS_ENERGY for energy in expanded)
+    total = grass = 0
+    for energy in card.get("energyCards") or []:
+        if not isinstance(energy, dict):
+            continue
+        card_id = int(energy.get("id") or 0)
+        total += 2 if card_id == TEAM_ROCKET_ENERGY else 1
+        grass += int(card_id == GRASS_ENERGY)
+    return total, grass
+
+
+def _ready_benched_spidops(observation: dict) -> bool:
+    state = observation.get("current") or {}
+    players = state.get("players") or []
+    seat = state.get("yourIndex")
+    if not isinstance(seat, int) or not 0 <= seat < len(players):
+        return False
+    mine = players[seat] or {}
+    rocket_count = sum(
+        int(int(card.get("id") or 0) in _TEAM_ROCKET_POKEMON)
+        for card in _board(mine)
+    )
+    if rocket_count < 3:
+        return False
+    for card in mine.get("bench") or []:
+        if not isinstance(card, dict) or int(card.get("id") or 0) != SPIDOPS:
+            continue
+        total, grass = _energy_supply(card)
+        if total >= 2 and grass >= 1:
+            return True
+    return False
+
+
+def _wobbuffet_exit_guard_action(observation: dict, baseline: list[int]) -> list[int]:
+    """Replace only Headbutt Bounce with an offered ready-Spidops retreat."""
+    if len(baseline) != 1:
+        return baseline
+    selection = observation.get("select") or {}
+    options = selection.get("option") or []
+    chosen_index = baseline[0]
+    if not isinstance(chosen_index, int) or not 0 <= chosen_index < len(options):
+        return baseline
+    chosen = options[chosen_index]
+    if (
+        int(chosen.get("type") or -1) != OPTION_ATTACK
+        or int(chosen.get("attackId") or 0) != HEADBUTT_BOUNCE
+    ):
+        return baseline
+    state = observation.get("current") or {}
+    players = state.get("players") or []
+    seat = state.get("yourIndex")
+    if not isinstance(seat, int) or not 0 <= seat < len(players):
+        return baseline
+    active = (((players[seat] or {}).get("active") or [{}])[0] or {})
+    if int(active.get("id") or 0) != WOBBUFFET or not _ready_benched_spidops(observation):
+        return baseline
+    retreat_indices = [
+        index
+        for index, option in enumerate(options)
+        if int(option.get("type") or -1) == OPTION_RETREAT
+    ]
+    return [retreat_indices[0]] if retreat_indices else baseline
 
 
 @torch.no_grad()
@@ -315,5 +411,7 @@ def agent(observation: dict):
     if _AGENT is None:
         _AGENT = _fresh_agent()
     if forbidden:
-        return _masked_greedy_action(observation, forbidden)
-    return _AGENT(observation)
+        baseline = list(_masked_greedy_action(observation, forbidden))
+    else:
+        baseline = list(_AGENT(observation))
+    return _wobbuffet_exit_guard_action(observation, baseline)
