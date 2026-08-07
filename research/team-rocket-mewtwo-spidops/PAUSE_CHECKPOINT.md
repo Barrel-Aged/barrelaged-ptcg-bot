@@ -1,38 +1,44 @@
 # Development pause checkpoint
 
-Paused: 2026-08-05 (America/Denver)
+Paused: 2026-08-06 (America/Denver)
 
 ## Final action
 
-`HelbrosRocketSpidopsArticunoV7` was accepted into the internal arena inbox for
-the next ladder job. Exactly one successor was submitted in this final pass.
+`HelbrosRocketSpidopsBC2RecoveryV8` was accepted into the internal arena inbox
+and promoted to the live ladder. Exactly one post-V7 successor was submitted.
 
-- Package bytes: `17,923,621`
+- Package bytes: `17,923,962`
 - Package SHA-256:
-  `8858324f993656691caa59700b968b88390e3edce94068df8dfb5cf28e455289`
+  `876ac11a1878267251844fad2fcae11fcad96f32a8f5b403ab16521e2c335e12`
 - Deck SHA-256:
-  `0bb258484e5638f3c51ac45def50fc2a1056feb20d27bd3842266514c8e109d8`
+  `256b54736e54ff0062f2310f08acdc5a43696975bd960f87503009375c13b852`
 - Model SHA-256:
-  `b4a361f42900629df28da9029e5193753344f71bc8806748b971cb551bfb674f`
+  `3c969193bfaa7fecf79b6fa220d0d20000379685585080f5916b01d724bf041b`
 - Main SHA-256:
-  `d690d9f316180ebd87f5648257deacbaaf8a9bb7bd50a5231ed8b128f6be2484`
+  `e9c2b0c59116845e6c11e520e8d47ca2f1476a32a69e6dad9fcd8da371dd4c9e`
 
-The source candidate, extracted package, and deterministic Articuno unit checks
-all passed. Two one-game official-engine terminal smokes against
-`AshV178MarnieFullBest` also completed. These are health checks, not a strength
-estimate.
+The source candidate, extracted package, deterministic guard checks, and two
+fresh official-engine terminal smokes passed. The final direct cells were 9-7
+against V5 and 9-7 against V7; all 32 games were terminal. A 2,510-decision
+replay audit had zero mismatches and observed one forced Articuno play. These
+are health checks, not a mature strength estimate.
 
 ## Admitted logic
 
-- Exact 60-card zero-Wobbuffet deck and frozen elite ScaleBC checkpoint.
+- Exact 60-card ScaleBCV2/V5 deck and frozen ScaleBC checkpoint.
 - Early Poke Pad preference for a missing Spidops evolution through turn four.
 - Brave Bangle attachment only when it converts legal Rocket Rush into an ex
   knockout.
 - Matchup-conditioned fifth-bench-slot reservation for Team Rocket's Articuno,
   using only own hand and public opponent information.
+- Headbutt Bounce exit to an offered retreat only when a Benched Spidops is
+  already ready; Rocket Mirror is never intercepted.
 
 ## Rejected or deferred
 
+- The final zero-Wobbuffet third-Murkrow arm went 14-10 against both V5 and V7
+  but failed 0-4 against Marnie and 0-4 against Starmie, so it was not
+  submitted.
 - Joltik/Galvantula and Rocket Zapdos/Maximum Belt deck packages failed locked
   screens.
 - The raw-action sampled teacher failed preregistered integrity, stability, and
@@ -41,16 +47,17 @@ estimate.
   constrained exploitation remain architecture/research interfaces rather
   than the final live controller.
 
-If development resumes, start with the detailed
-`methodology/PAUSED_DECK_REWORK_REVISIT_NOTE.md`, wait for a mature arena sample,
-and continue the Wobbuffet-free deck search rather than restoring Wobbuffet.
+The first read-only live snapshot was 8-3 at rating 778.4. That is useful
+confirmation that the exact package is executing, but far too small for a
+stable performance claim. If development resumes, start with
+`methodology/BC2_RECOVERY_V8_SUBMISSION_AND_PAUSE.md` and the detailed
+continuation note; do not assume either retaining or removing Wobbuffet is
+already proven optimal.
 
 ## GitHub publication
 
-The 742-file, 8,138,811-byte publication snapshot was posted to the existing
-private competition repository as draft PR
-<https://github.com/Barrel-Aged/barrelaged-ptcg-bot/pull/1> on branch
-`agent/publish-mewtwo-spidops-research`. The initial publication commit was
-`cb4c0e3aa459c2cc6c906faef39740010940c521`; a follow-up checkpoint-only commit
-records this link. Critical remote blobs were compared with local Git object
-hashes and matched byte-for-byte.
+This updated publication snapshot is intended for the existing private draft
+PR <https://github.com/Barrel-Aged/barrelaged-ptcg-bot/pull/1> on branch
+`agent/publish-mewtwo-spidops-research`. The original publication commit was
+`cb4c0e3aa459c2cc6c906faef39740010940c521`; the V8 publication commit is
+recorded after the remote push completes.
