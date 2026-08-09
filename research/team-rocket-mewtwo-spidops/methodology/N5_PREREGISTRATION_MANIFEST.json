@@ -1,0 +1,54 @@
+{
+  "schema": "rocket-blueprint-n5-preregistration/v1",
+  "protocol": "rocket-greedy-compatible-ppo/v1",
+  "created_at": "2026-07-29T11:24:49.4591815-06:00",
+  "created_before_training_complete": true,
+  "development_games_started": false,
+  "validation_games_started": false,
+  "regression_games_started": false,
+  "frozen_candidate": {
+    "bundle_sha256": "0fe5cfd46eacd57ce42932c89cf152ce6ea750b96033702340e9b822284a4404",
+    "deck_sha256": "256b54736e54ff0062f2310f08acdc5a43696975bd960f87503009375c13b852",
+    "main_sha256": "8c87db1a011acf3cc5a614159d1ac6b6bf56aa7286f0f8a7148bb8e2aa20a6d1",
+    "model_sha256": "cb62f347280fde7f8efbbcecb879c6cdda2bad6c610b05754a089011950e50ff"
+  },
+  "opponents": {
+    "AshMarnieGeneralV110_extracted": {
+      "bundle_sha256": "3bb5e40bb1583e31470eee263ed615c9207427c7b5d2199e80fbe3571e2cbb2b",
+      "deck_sha256": "8e431d4e9a52fdbeb5c507326ddf4d992896c720272a67d25b0f662afcd4dc2b",
+      "main_sha256": "8c87db1a011acf3cc5a614159d1ac6b6bf56aa7286f0f8a7148bb8e2aa20a6d1",
+      "model_sha256": "552f1b5ddfffe55ce0c6c0d499ddb9f209a8d1e8cd53a5c64da0fcf8e61fb12b"
+    },
+    "HelbrosMarnieGeneralRecoveryV4_extracted": {
+      "bundle_sha256": "caf361fd297ab63b24338650b6e396a296b961bb6ba61d2519799a90dff738f4",
+      "deck_sha256": "8e431d4e9a52fdbeb5c507326ddf4d992896c720272a67d25b0f662afcd4dc2b",
+      "main_sha256": "d077ff28d8a267bf3f2c28fb26e0ae798dedeac5c1d9274627cc8c9e45243533",
+      "model_sha256": "6f93f728c3f7cf5993d2f635183d48a530de1143257944316b2782d067885a0c"
+    },
+    "SparkRocketSpidopsV1_extracted": {
+      "bundle_sha256": "a2879e76517280c0026991e26f3706b57ca4796aa8633db489bea1510dc6f940",
+      "deck_sha256": "256b54736e54ff0062f2310f08acdc5a43696975bd960f87503009375c13b852",
+      "main_sha256": "24c62917c58ed02bfa913ddd54a21db1846a42e2acadb53ae6b63257edf4c3a1",
+      "model_sha256": null
+    }
+  },
+  "documents": {
+    "N5_ROCKET_BLUEPRINT_FINETUNE_PROTOCOL.md": "a961e535790ed50fed5fe91b9b459aaf4aabb5af84645cbdcf3d2e3ac17459f4",
+    "N5_ROCKET_BLUEPRINT_DEVELOPMENT_LOCK.md": "38bbd0957c92176b2546053b5ee02caef0c3e54f96c96d343f053ead0ab01287",
+    "N5_ROCKET_BLUEPRINT_VALIDATION_LOCK.md": "e38492419e611f088ca022447cb98c9c3e2056e174a58c5e3bec08a79d5a24ff",
+    "N5_ROCKET_BLUEPRINT_REGRESSION_LOCK.md": "6e9397b5fea2d153c03361db3dbe31b729523e71d836b2bfc3b6a2d9ee48e961"
+  },
+  "implementation": {
+    "scripts/train_rocket_greedy_ppo.py": "bb1b31fae5216bcca0b9aa44e27fc1c192c15baa0288ff4972ac722e44ae3402",
+    "scripts/build_rocket_blueprint_n5_arms.py": "6ee3b4ef271a324fa6af59c50c144ff34649d2595f4ca4e96be899bba422ffd2",
+    "scripts/collect_rocket_blueprint_n5_panel.py": "f3cb21219efbf82c94a1bebe1d90b712fcd02cb28037397a02176d2ce5047f6b",
+    "scripts/analyze_rocket_blueprint_n5_development.py": "2b94b86b70c7039517177cc26652c936c9a9d5067ec9287b61d8adeba0e9714b",
+    "scripts/freeze_rocket_blueprint_n5_validation.py": "06a95606f9c6c4df9c0948e4747c60803c66c4ac7062c133e62c44f60053e6fa",
+    "scripts/analyze_rocket_blueprint_n5_validation.py": "aae762320467319d85e55147e2c8321ce0673354a2765c8b50484003547d2b19",
+    "scripts/analyze_rocket_blueprint_n5_regression.py": "1750809cfbb22a1f48870ab8a78604f626f7c93257e719083f125ca34d0409ff",
+    "scripts/verify_rocket_blueprint_n5_runtime_parity.py": "516d95cf9d2a908e2ee13b9dafc4ab40ebf53d50d3d5bf9d31ffca8936338f0c",
+    "scripts/stage_rocket_blueprint_n5_candidate.py": "139669714093e91f25b7ff7e31d622249a2c2243947006c21b8e711915ba25f8",
+    "scripts/package_candidate_directory.py": "5e0db53b4f5e23a4333c98b9ff439ba28af1d19de7c6008b5af4e25a5547830d"
+  },
+  "claim_boundary": "pre-result protocol and implementation lock; contains no development, validation, regression, or arena strength result"
+}

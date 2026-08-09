@@ -1,0 +1,280 @@
+{
+  "schema_version": 1,
+  "source": {
+    "candidate": "C:\\Users\\jhos4\\Documents\\Codex\\2026-07-26\\mewtwo-strategic-planner\\outputs\\team-rockets-mewtwo-spidops-bot\\artifacts\\team_rocket_recovery\\candidates\\v110_transfer",
+    "model_sha256": "552f1b5ddfffe55ce0c6c0d499ddb9f209a8d1e8cd53a5c64da0fcf8e61fb12b",
+    "replays": "C:\\Users\\jhos4\\Documents\\Codex\\2026-07-26\\mewtwo-strategic-planner\\outputs\\team-rockets-mewtwo-spidops-bot\\work\\kaggle_leader_54834745",
+    "game_count": 100,
+    "deck_card_count": 60
+  },
+  "alignment": "action paired with same seat's previous observation",
+  "unsupported_policy_cases": "optional empty selections and early stops are excluded because V110 always emits maxCount choices",
+  "split_games": {
+    "train": [
+      "episode_87604436.json",
+      "episode_87547673.json",
+      "episode_87621066.json",
+      "episode_87603398.json",
+      "episode_87610334.json",
+      "episode_87602899.json",
+      "episode_87610877.json",
+      "episode_87627003.json",
+      "episode_87608229.json",
+      "episode_87597598.json",
+      "episode_87619034.json",
+      "episode_87601791.json",
+      "episode_87597093.json",
+      "episode_87551554.json",
+      "episode_87581453.json",
+      "episode_87613036.json",
+      "episode_87584388.json",
+      "episode_87611414.json",
+      "episode_87560316.json",
+      "episode_87546578.json",
+      "episode_87605255.json",
+      "episode_87627534.json",
+      "episode_87551002.json",
+      "episode_87600248.json",
+      "episode_87557464.json",
+      "episode_87606560.json",
+      "episode_87553667.json",
+      "episode_87604923.json",
+      "episode_87633904.json",
+      "episode_87546011.json",
+      "episode_87624444.json",
+      "episode_87613563.json",
+      "episode_87616301.json",
+      "episode_87559182.json",
+      "episode_87626498.json",
+      "episode_87603897.json",
+      "episode_87619577.json",
+      "episode_87549892.json",
+      "episode_87549344.json",
+      "episode_87623921.json",
+      "episode_87610861.json",
+      "episode_87615209.json",
+      "episode_87625997.json",
+      "episode_87602345.json",
+      "episode_87551003.json",
+      "episode_87559744.json",
+      "episode_87630739.json",
+      "episode_87601206.json",
+      "episode_87561427.json",
+      "episode_87607095.json",
+      "episode_87614137.json",
+      "episode_87554206.json",
+      "episode_87606024.json",
+      "episode_87634942.json",
+      "episode_87599192.json",
+      "episode_87561954.json",
+      "episode_87600766.json",
+      "episode_87611953.json",
+      "episode_87569452.json",
+      "episode_87549906.json",
+      "episode_87629688.json",
+      "episode_87588106.json",
+      "episode_87621705.json",
+      "episode_87573032.json",
+      "episode_87605200.json",
+      "episode_87554734.json",
+      "episode_87629152.json",
+      "episode_87630204.json",
+      "episode_87552087.json",
+      "episode_87546025.json",
+      "episode_87631802.json",
+      "episode_87601282.json",
+      "episode_87622220.json",
+      "episode_87595406.json",
+      "episode_87633394.json",
+      "episode_87614677.json",
+      "episode_87545511.json",
+      "episode_87632852.json",
+      "episode_87560328.json",
+      "episode_87626050.json"
+    ],
+    "validation": [
+      "episode_87598135.json",
+      "episode_87581729.json",
+      "episode_87596917.json",
+      "episode_87637669.json",
+      "episode_87548233.json",
+      "episode_87604339.json",
+      "episode_87553172.json",
+      "episode_87601647.json",
+      "episode_87617399.json",
+      "episode_87609793.json"
+    ],
+    "test": [
+      "episode_87615746.json",
+      "episode_87608733.json",
+      "episode_87625535.json",
+      "episode_87616845.json",
+      "episode_87555254.json",
+      "episode_87623295.json",
+      "episode_87553161.json",
+      "episode_87607954.json",
+      "episode_87609262.json",
+      "episode_87555238.json"
+    ]
+  },
+  "extraction": {
+    "train": {
+      "supported_decisions": 4719,
+      "supported_choice_targets": 5218,
+      "trivial": 600,
+      "unsupported_early_stop": 41,
+      "unsupported_empty": 371,
+      "examples": 5218
+    },
+    "validation": {
+      "trivial": 78,
+      "supported_decisions": 618,
+      "supported_choice_targets": 676,
+      "unsupported_empty": 58,
+      "unsupported_early_stop": 5,
+      "examples": 676
+    },
+    "test": {
+      "supported_decisions": 713,
+      "supported_choice_targets": 778,
+      "trivial": 88,
+      "unsupported_empty": 94,
+      "unsupported_early_stop": 9,
+      "examples": 778
+    }
+  },
+  "training": {
+    "mode": "last",
+    "seed": 20260728,
+    "epochs_requested": 12,
+    "best_epoch": 12,
+    "batch_size": 96,
+    "learning_rate": 3e-05,
+    "weight_decay": 0.0001,
+    "label_smoothing": 0.01,
+    "trainable_parameters": 1184257,
+    "elapsed_seconds": 258.0779999999795,
+    "history": [
+      {
+        "epoch": 1,
+        "train_loss": 1.3644640602431293,
+        "validation_loss": 1.1802302845836392,
+        "validation_top1": 0.5591715976331361,
+        "elapsed_seconds": 19.73399999999674
+      },
+      {
+        "epoch": 2,
+        "train_loss": 1.2587428193477983,
+        "validation_loss": 1.1370835064430913,
+        "validation_top1": 0.5680473372781065,
+        "elapsed_seconds": 40.10899999999674
+      },
+      {
+        "epoch": 3,
+        "train_loss": 1.2014644071945244,
+        "validation_loss": 1.1012211808791528,
+        "validation_top1": 0.5887573964497042,
+        "elapsed_seconds": 60.20299999997951
+      },
+      {
+        "epoch": 4,
+        "train_loss": 1.1574563025148858,
+        "validation_loss": 1.0824360297276423,
+        "validation_top1": 0.5976331360946746,
+        "elapsed_seconds": 80.79699999999139
+      },
+      {
+        "epoch": 5,
+        "train_loss": 1.1205682897531195,
+        "validation_loss": 1.0794159410267892,
+        "validation_top1": 0.5902366863905325,
+        "elapsed_seconds": 101.59299999999348
+      },
+      {
+        "epoch": 6,
+        "train_loss": 1.0854124767015427,
+        "validation_loss": 1.062065361166847,
+        "validation_top1": 0.6050295857988166,
+        "elapsed_seconds": 122.06200000000536
+      },
+      {
+        "epoch": 7,
+        "train_loss": 1.0573532309921458,
+        "validation_loss": 1.0533101932536921,
+        "validation_top1": 0.599112426035503,
+        "elapsed_seconds": 142.73399999999674
+      },
+      {
+        "epoch": 8,
+        "train_loss": 1.0322007766945145,
+        "validation_loss": 1.0523553021560759,
+        "validation_top1": 0.5931952662721893,
+        "elapsed_seconds": 163.09299999999348
+      },
+      {
+        "epoch": 9,
+        "train_loss": 1.0097472492466946,
+        "validation_loss": 1.0514312019714942,
+        "validation_top1": 0.5961538461538461,
+        "elapsed_seconds": 184.17199999999139
+      },
+      {
+        "epoch": 10,
+        "train_loss": 0.9890108514946967,
+        "validation_loss": 1.054747719383804,
+        "validation_top1": 0.599112426035503,
+        "elapsed_seconds": 204.93700000000536
+      },
+      {
+        "epoch": 11,
+        "train_loss": 0.9661072984697627,
+        "validation_loss": 1.0583951162868703,
+        "validation_top1": 0.5961538461538461,
+        "elapsed_seconds": 225.01499999998487
+      },
+      {
+        "epoch": 12,
+        "train_loss": 0.9492789726231737,
+        "validation_loss": 1.0441650815264008,
+        "validation_top1": 0.6257396449704142,
+        "elapsed_seconds": 245.43700000000536
+      }
+    ]
+  },
+  "base_metrics": {
+    "train": {
+      "examples": 5218,
+      "loss": 1.490989660202383,
+      "top1": 0.5053660406285934
+    },
+    "validation": {
+      "examples": 676,
+      "loss": 1.3333628890077038,
+      "top1": 0.5443786982248521
+    },
+    "test": {
+      "examples": 778,
+      "loss": 1.6886049616306178,
+      "top1": 0.4781491002570694
+    }
+  },
+  "tuned_metrics": {
+    "train": {
+      "examples": 5218,
+      "loss": 0.8993477285844972,
+      "top1": 0.6776542736680721
+    },
+    "validation": {
+      "examples": 676,
+      "loss": 1.0441650815264008,
+      "top1": 0.6257396449704142
+    },
+    "test": {
+      "examples": 778,
+      "loss": 1.2954999266675935,
+      "top1": 0.5655526992287918
+    }
+  },
+  "tuned_model": "C:\\Users\\jhos4\\Documents\\Codex\\2026-07-26\\mewtwo-strategic-planner\\outputs\\team-rockets-mewtwo-spidops-bot\\artifacts\\team_rocket_recovery\\leader_bc\\last\\model.pt",
+  "tuned_model_sha256": "7098df4dde50efb062816a7991a08ed8201ac862a6280be9958ff12e5fbae5d3"
+}

@@ -1,0 +1,34 @@
+--- a/soldier/net.py
++++ b/soldier/net.py
+@@
+         self.forbid_end_when_attack = bool(forbid_end_when_attack)
++        self.last_confidence = None
++        self.last_margin = None
+@@
+         if hi == 0:
++            self.last_confidence = 1.0
++            self.last_margin = 1.0
+             return []
+@@
+-            if hi == 1:
+-                if self.forbid_end_when_attack:
+-                    logits = attack_safe_logits(logits, sel["option"])
++            if hi == 1 and self.forbid_end_when_attack:
++                logits = attack_safe_logits(logits, sel["option"])
++            probabilities = torch.softmax(logits, dim=0)
++            if bool(torch.isfinite(probabilities).all()):
++                ordered = torch.sort(probabilities, descending=True).values
++                self.last_confidence = float(ordered[0])
++                self.last_margin = float(
++                    ordered[0] - (ordered[1] if ordered.numel() > 1 else 0.0)
++                )
++            else:
++                self.last_confidence = None
++                self.last_margin = None
++            if hi == 1:
+@@
+-        except Exception:
++        except Exception:
++            self.last_confidence = None
++            self.last_margin = None
+             return random_legal_choice(sel)

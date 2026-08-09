@@ -1,0 +1,64 @@
+{
+  "schema": "bc2-recovery-exact-guard-v8/v1",
+  "created_utc_date": "2026-08-06",
+  "intended_arena_identity": "HelbrosRocketSpidopsBC2RecoveryV8",
+  "substrate": {
+    "deck_identity": "byte-exact ScaleBCV2 / EarlyPadLethalV5 deck",
+    "deck_sha256": "256b54736e54ff0062f2310f08acdc5a43696975bd960f87503009375c13b852",
+    "model_identity": "byte-exact ScaleBCV2 / EarlyPadLethalV5 model",
+    "model_sha256": "3c969193bfaa7fecf79b6fa220d0d20000379685585080f5916b01d724bf041b",
+    "deck_library_sha256": "ed56d55cec6e2a87415db422b72f16baa8ab552e87c625de75cd0d8cb7e8d4e0",
+    "deck_rows": 60,
+    "wobbuffet_count": 1,
+    "murkrow_count": 2
+  },
+  "runtime": {
+    "main_sha256": "e9c2b0c59116845e6c11e520e8d47ca2f1476a32a69e6dad9fcd8da371dd4c9e",
+    "official_engine_adapter_preserved": true,
+    "legality_handling_preserved": true,
+    "guards": [
+      "early Poke Pad search for missing Spidops through turn four",
+      "Brave Bangle only for an exact ex knockout with Rocket Rush",
+      "public-information Articuno fifth-bench-slot reservation",
+      "Headbutt Bounce exit to an offered ready-Spidops retreat"
+    ],
+    "hidden_hand_read": false,
+    "sampled_rollout_search": false
+  },
+  "rejected_first_arm": {
+    "path": "work/target80_candidates/bc2_recovery_murkrow_articuno_v8",
+    "submitted": false,
+    "direct_v5": "14-10",
+    "direct_v7": "14-10",
+    "marnie": "0-4",
+    "starmie": "0-4",
+    "alakazam": "4-0",
+    "decision": "failed preregistered broad gate"
+  },
+  "final_health_evidence": {
+    "deterministic_checks": "passed exact substrate plus five guard cases",
+    "official_engine_smoke": "1 terminal game",
+    "direct_v5": "9-7; 16/16 terminal",
+    "direct_v7": "9-7; 16/16 terminal",
+    "trace_decisions": 2510,
+    "trace_exact_matches": 2510,
+    "trace_mismatches": 0,
+    "observed_guard_activations": {
+      "early_spidops": 14,
+      "lethal_bangle": 0,
+      "articuno_forced": 1,
+      "articuno_masked": 0,
+      "wobbuffet_exit": 0
+    }
+  },
+  "claims_boundary": {
+    "local_cells_are_strength_proof": false,
+    "arena_mature_estimate_available_at_packaging": false,
+    "kaggle_submission_made": false,
+    "wobbuffet_exit_causal_value_proven": false
+  },
+  "protocols": [
+    "BC2_RECOVERY_MURKROW_ARTICUNO_V8_PROTOCOL.md",
+    "BC2_RECOVERY_V8_REPAIR_AMENDMENT.md"
+  ]
+}

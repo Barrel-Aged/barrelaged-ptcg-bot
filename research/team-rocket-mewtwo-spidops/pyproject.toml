@@ -1,0 +1,66 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "team-rockets-mewtwo-spidops-bot"
+version = "0.7.0"
+description = "Belief-aware Pokemon TCG research bot with official integration and neural game-theoretic planning interfaces"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = ["torch>=2.0"]
+
+[project.scripts]
+rocketbot-smoke = "rocketbot.demo:main"
+rocketbot-phase2-demo = "rocketbot.phase2_demo:main"
+rocketbot-phase3-demo = "rocketbot.phase3_demo:main"
+rocketbot-phase4-demo = "rocketbot.phase4_demo:main"
+rocketbot-phase5-demo = "rocketbot.phase5_demo:main"
+rocketbot-phase6-demo = "rocketbot.phase6_demo:main"
+rocketbot-phase6-foundation = "rocketbot.phase6_foundation:main"
+rocketbot-phase6-neural = "rocketbot.phase6_neural:main"
+rocketbot-phase6-bounds = "rocketbot.phase6_bounds:main"
+rocketbot-phase6-resolving = "rocketbot.phase6_resolving:main"
+rocketbot-phase6-exploitation = "rocketbot.phase6_exploitation:main"
+rocketbot-phase6-bridge = "rocketbot.phase6_bridge:main"
+rocketbot-phase6-trajectory = "rocketbot.phase6_trajectory:main"
+rocketbot-phase6-trajectory-neural = "rocketbot.phase6_trajectory_neural:main"
+rocketbot-phase6-native-game = "rocketbot.phase6_native_game:main"
+rocketbot-phase6-native-blueprint = "rocketbot.phase6_native_blueprint:main"
+rocketbot-phase6-mccfr-reference = "rocketbot.phase6_mccfr_reference:main"
+rocketbot-phase6-native-external-sampling = "rocketbot.phase6_native_external_sampling:main"
+rocketbot-phase6-outcome-reference = "rocketbot.phase6_outcome_sampling_reference:main"
+rocketbot-phase6-native-plan-blueprint = "rocketbot.phase6_native_plan_blueprint:main"
+rocketbot-phase6-native-plan-iterations = "rocketbot.phase6_native_plan_iterations:main"
+rocketbot-phase6-native-safety-admission = "rocketbot.phase6_native_safety_admission:main"
+rocketbot-phase6-native-depth-limited = "rocketbot.phase6_native_depth_limited:main"
+rocketbot-phase6-native-leaf-calibration = "rocketbot.phase6_native_leaf_calibration:main"
+rocketbot-phase6-native-belief-calibration = "rocketbot.phase6_native_belief_calibration:main"
+rocketbot-phase6-native-leaf-model = "rocketbot.phase6_native_leaf_model:main"
+rocketbot-phase6-native-public-leaf = "rocketbot.phase6_native_public_leaf:main"
+rocketbot-phase6-root-heldout-leaf = "rocketbot.phase6_root_heldout_leaf:main"
+rocketbot-phase6-opponent-deviation-values = "rocketbot.phase6_opponent_deviation_values:main"
+rocketbot-phase6-native-counterfactual-reach = "rocketbot.phase6_native_counterfactual_reach:main"
+rocketbot-phase6-aligned-counterfactual-values = "rocketbot.phase6_aligned_counterfactual_values:main"
+rocketbot-phase6-aligned-public-range = "rocketbot.phase6_aligned_public_range:main"
+rocketbot-phase6-official-prefix-reach = "rocketbot.phase6_official_prefix_reach:main"
+rocketbot-phase6-joint-official-values = "rocketbot.phase6_joint_official_values:main"
+rocketbot-phase6-official-range-calibration = "rocketbot.phase6_official_range_calibration:main"
+rocketbot-phase6-official-intent-calibration = "rocketbot.phase6_official_intent_calibration:main"
+rocketbot-phase6-official-policy-generalization = "rocketbot.phase6_official_policy_generalization:main"
+rocketbot-phase6-official-value-leaf = "rocketbot.phase6_official_value_leaf:main"
+rocketbot-phase6-expected-value-surfaces = "rocketbot.phase6_expected_value_surfaces:main"
+rocketbot-phase6-branch-conditioned-values = "rocketbot.phase6_branch_conditioned_values:main"
+rocketbot-phase6-semiparametric-branch-hybrid = "rocketbot.phase6_semiparametric_branch_hybrid:main"
+rocketbot-phase6-expanded-root-mean = "rocketbot.phase6_expanded_root_mean:main"
+rocketbot-phase6-high-precision-confirmation = "rocketbot.phase6_high_precision_confirmation:main"
+rocketbot-phase6-public-range-counterfactual-advantages = "rocketbot.phase6_public_range_counterfactual_advantages:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+rocketbot = ["data/*.json"]
