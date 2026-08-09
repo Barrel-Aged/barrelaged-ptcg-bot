@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "frozen_split": {
+    "validation_games": 17,
+    "test_games": 18,
+    "validation_rows": 766,
+    "test_rows": 937
+  },
+  "selected_threshold": 0.35228917002677923,
+  "selection_rule": "maximize validation complete-action accuracy; tie fewer baseline routes; tie lower threshold",
+  "validation": {
+    "neural_complete_action_accuracy": 0.608355091383812,
+    "hybrid_complete_action_accuracy": 0.618798955613577,
+    "baseline_routes": 84,
+    "routed_disagreements": 63
+  },
+  "untouched_test": {
+    "neural_complete_action_accuracy": 0.575240128068303,
+    "hybrid_complete_action_accuracy": 0.5827107790821772,
+    "neural_first_action_accuracy": 0.6051227321237994,
+    "hybrid_first_action_accuracy": 0.6147278548559232,
+    "baseline_routes": 88,
+    "routed_disagreements": 61
+  },
+  "repeatability": {
+    "byte_exact": true,
+    "full_calibration_sha256": "b7ac571a748dfafcd4299a24de75190c07d8933cb5d4138d4da531cf38db0c74"
+  },
+  "model_sha256": "e80b691f50b82fbaecd61d3a9354cd727737a4e302d9a243fa5f91fcfffb8eea",
+  "offline_admitted": true
+}
