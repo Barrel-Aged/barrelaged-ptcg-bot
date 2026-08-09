@@ -1,4 +1,4 @@
-# Development pause checkpoint
+# Development pause checkpoints
 
 Paused: 2026-08-06 (America/Denver)
 
@@ -54,11 +54,35 @@ stable performance claim. If development resumes, start with
 continuation note; do not assume either retaining or removing Wobbuffet is
 already proven optimal.
 
+## Second pause: final Lucario iteration
+
+Paused again: 2026-08-08 (America/Denver)
+
+One final admitted candidate was published to the internal arena as
+`HelbrosMegaLucarioV123PublicBCSafeHybrid`; no Kaggle submission was made.
+
+- Package bytes: `18,392,630`
+- Package SHA-256:
+  `1e9f32a1aa8c4725c424cfea42a4cc73915489a3555c9028797221d07bf2a975`
+- Neural model SHA-256:
+  `e80b691f50b82fbaecd61d3a9354cd727737a4e302d9a243fa5f91fcfffb8eea`
+- Calibrated safety threshold: `0.35228917002677923`
+
+Frozen offline complete-action accuracy improved from 60.84% to 61.88% on
+validation and from 57.52% to 58.27% on untouched test. Preregistered
+side-swapped official-engine panels were 7-5 versus V122, 11-1 versus V121,
+2-10 versus the known Rocket structural counter, and 7-5 versus Starmie CFV13.
+The extracted archive completed two terminal smoke games. These results admit
+the candidate to the arena; they do not verify a 1000-Elo Kaggle bot.
+
+Development is paused after this single final iteration. Promotion to Kaggle,
+if desired after sufficient arena evidence, is a manual user action.
+
 ## GitHub publication
 
-The updated snapshot is published in the existing private draft PR
+The durable snapshot lives in the existing private draft PR
 <https://github.com/Barrel-Aged/barrelaged-ptcg-bot/pull/1> on branch
-`agent/publish-mewtwo-spidops-research`. It contains 748 changed files relative
-to the repository base. Sixteen final/new remote blobs were compared with the
-local Git object hashes and matched exactly; the documented private and
-third-party exclusions remain absent.
+`agent/publish-mewtwo-spidops-research`. The 2026-08-08 update adds the V1-V3
+public-BC protocols/results, final authored V123 composition code, exact deck,
+calibration summary, updated scripts, archive hashes, and this second pause
+boundary. Private data and copied/official runtimes remain excluded.

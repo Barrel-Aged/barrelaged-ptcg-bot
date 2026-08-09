@@ -6,18 +6,19 @@ latents, six strategic value heads, state-conditioned value aggregation,
 autoregressive tactical actions, opponent-plan and range abstractions,
 selective search, search-guided learning, and a game-theoretic planning pivot.
 
-Development was paused on 2026-08-06 after submitting one post-V7 internal-
-arena iteration, `HelbrosRocketSpidopsBC2RecoveryV8`. The final bot restores
-the exact ScaleBCV2/V5 deck and neural checkpoint, retains the admitted early-
-Spidops and exact-lethal guards, reserves the fifth bench slot for Articuno in
-publicly identified effect-attack matchups, and redirects only selected
-Wobbuffet Headbutt Bounce actions when a ready Spidops retreat is offered. Its
-arena package SHA-256 is
-`876ac11a1878267251844fad2fcae11fcad96f32a8f5b403ab16521e2c335e12`.
+The original Team Rocket deck track was paused on 2026-08-06 after the
+Articuno bench-reservation and narrow Wobbuffet-exit iteration
+`HelbrosRocketSpidopsBC2RecoveryV8`. A later ladder-strength investigation used
+the same research infrastructure to build one final Mega Lucario candidate,
+`HelbrosMegaLucarioV123PublicBCSafeHybrid`, from public leader trajectories.
+V123 combines an admitted neural behavior clone with the live deterministic
+Lucario baseline on low-confidence decisions. It was accepted by the internal
+arena on 2026-08-08; no direct Kaggle submission was made.
 
-No claim of superhuman strength, an 80% arena win rate, exploitability bounds,
-or equilibrium convergence is made. The first read-only arena snapshot was
-8-3 and is far too small to be a mature strength estimate.
+No claim of superhuman strength, 1000 Elo, public-leader equivalence,
+exploitability bounds, or equilibrium convergence is made. Small local panels
+and initial arena snapshots are admission/health evidence, not mature strength
+estimates.
 
 ## Start here
 
@@ -37,8 +38,15 @@ or equilibrium convergence is made. The first read-only arena snapshot was
 - [`methodology/BC2_RECOVERY_V8_SUBMISSION_AND_PAUSE.md`](methodology/BC2_RECOVERY_V8_SUBMISSION_AND_PAUSE.md)
   gives the final diagnosis, rejected zero-Wobbuffet arm, verification, hashes,
   submission acknowledgement, and pause boundary.
+- [`methodology/MAJKEL_LUCARIO_PUBLIC_BC_V3_SAFE_HYBRID_PROTOCOL.md`](methodology/MAJKEL_LUCARIO_PUBLIC_BC_V3_SAFE_HYBRID_PROTOCOL.md)
+  is the preregistration for the final confidence-gated composition.
+- [`methodology/MAJKEL_LUCARIO_PUBLIC_BC_V3_SAFE_HYBRID_RESULT.md`](methodology/MAJKEL_LUCARIO_PUBLIC_BC_V3_SAFE_HYBRID_RESULT.md)
+  records its frozen calibration, official-engine gates, packaging, and arena
+  boundary.
 - [`arena_bot/README.md`](arena_bot/README.md) documents the final submitted
-  wrapper, deck, guards, hashes, and runtime boundary.
+  Team Rocket wrapper, deck, guards, hashes, and runtime boundary.
+- [`competition_bot_v123/README.md`](competition_bot_v123/README.md) documents
+  the final Lucario composition and exact publication boundary.
 
 ## Repository map
 
@@ -51,6 +59,8 @@ or equilibrium convergence is made. The first read-only arena snapshot was
 - `methodology/`: the complete chronological protocols, locks, reports, and
   rejection records from the project root.
 - `arena_bot/`: final project-authored arena wrapper and exact deck identity.
+- `competition_bot_v123/`: final authored Lucario entrypoint, hybrid router,
+  exact deck, calibration summary, and runtime/model hashes.
 
 ## Core scaffold smoke
 
@@ -69,9 +79,9 @@ published here; run focused core tests in an environment that lacks them.
 
 The repository contains all source authored in this project, but it does not
 redistribute the official competition engine, pulled opponent bundles, private
-arena telemetry/replays, credentials, third-party packaged inference runtime,
-or the 17 MB frozen model checkpoint. The final wrapper therefore documents
-but does not independently recreate the submitted archive. See
+arena telemetry/replays, credentials, copied baseline/inference runtimes, or
+binary frozen model checkpoints. The final wrappers therefore document but do
+not independently recreate the submitted archives. See
 [`PUBLICATION_BOUNDARY.md`](PUBLICATION_BOUNDARY.md) for the exact exclusions
 and hashes.
 

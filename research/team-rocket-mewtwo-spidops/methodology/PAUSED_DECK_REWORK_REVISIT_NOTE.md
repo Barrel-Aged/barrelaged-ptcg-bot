@@ -2,8 +2,40 @@
 
 Status: **paused by user; no active deck work**  
 Originally recorded: 2026-08-01  
-Latest pause checkpoint: 2026-08-06 (after the BC2 Recovery V8 internal-arena
-submission and GitHub publication update)
+Latest pause checkpoint: 2026-08-07 (after the Safe Router V13 internal-arena
+submission)
+
+## 2026-08-07 superseding checkpoint
+
+`HelbrosRocketSpidopsSafeRouterV13` is the latest submitted identity. It uses
+the exact V5 deck and a byte-exact V5 neural model as its safe blueprint, while
+routing to a separately trained retention-AWR model only after public cards
+identify Dragapult, Marnie, or Starmie. Both models advance from game start;
+unrecognized matchups, including Rocket mirrors and Alakazam, stay on V5.
+
+V13 passed its official-observation behavioral audit with 780/780 legal
+decisions and zero route mismatches. It then cleared every preregistered floor
+in a fresh 120-game official-engine panel: 20/24 Dragapult, 13/24 Marnie, 13/24
+direct V5, 23/24 Alakazam, and 5/24 Starmie, for 74/120 overall. The exact
+archive was accepted by the internal arena. Full provenance, component hashes,
+verification, and claims boundary are in
+`PUBLIC_RANGE_SAFE_ROUTER_V13_SUBMISSION_AND_PAUSE.md`.
+
+The first read-only post-promotion snapshot was 10-5 at rating 791.1. Treat
+that only as execution evidence, not a mature strength estimate; no monitoring
+loop was left running.
+
+The V13 list still contains one Wobbuffet because every completed removal arm
+introduced larger setup or matchup regressions. This does not establish
+Wobbuffet as optimal. If deck construction is reopened, the queued deck-level
+objective remains a coherent zero-Wobbuffet rebuild with a stronger opening
+Basic/second-attacker package and an exact-deck-trained policy. Preserve V13
+unchanged as the current deployable control.
+
+No local monitor, evaluation, training, packaging, submission, publication,
+or Kaggle job should be considered active after this checkpoint. The internal
+arena may schedule V13, but do not pull or analyze its games until the user
+explicitly resumes evaluation.
 
 ## 2026-08-06 superseding checkpoint
 

@@ -75,6 +75,13 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--threads", type=int, default=6)
     parser.add_argument("--max-games", type=int, default=0)
     parser.add_argument(
+        "--focal-team",
+        help=(
+            "Train on the uniquely named team's decisions in every replay, including losses. "
+            "When omitted, preserve the original winner-only behavior."
+        ),
+    )
+    parser.add_argument(
         "--frozen-split-summary",
         type=Path,
         help=(
@@ -115,13 +122,24 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def replay_decisions(path: Path) -> tuple[list[Decision], Counter[str]]:
+def replay_decisions(
+    path: Path, focal_team: str | None = None
+) -> tuple[list[Decision], Counter[str]]:
     """Return winning-seat decisions with Kaggle's required one-step shift."""
     payload = json.loads(path.read_text(encoding="utf-8-sig"))
     rewards = payload.get("rewards") or []
-    if len(rewards) != 2 or rewards[0] == rewards[1]:
+    if len(rewards) != 2:
         return [], Counter({"non_decisive_game": 1})
-    winner = int(rewards[1] > rewards[0])
+    if focal_team:
+        teams = list((payload.get("info") or {}).get("TeamNames") or [])
+        seats = [index for index, name in enumerate(teams) if name == focal_team]
+        if len(seats) != 1:
+            return [], Counter({"focal_team_not_unique": 1})
+        actor_of_interest = seats[0]
+    else:
+        if rewards[0] == rewards[1]:
+            return [], Counter({"non_decisive_game": 1})
+        actor_of_interest = int(rewards[1] > rewards[0])
     previous_observations: list[dict[str, Any] | None] = [None, None]
     decisions: list[Decision] = []
     counts: Counter[str] = Counter()
@@ -135,7 +153,7 @@ def replay_decisions(path: Path) -> tuple[list[Decision], Counter[str]]:
             action = agent.get("action")
             decision_observation = previous_observations[actor]
             if (
-                actor == winner
+                actor == actor_of_interest
                 and isinstance(decision_observation, dict)
                 and decision_observation.get("select") is not None
                 and isinstance(action, list)
@@ -277,11 +295,12 @@ def load_examples(
     deck_library: Any,
     belief_class: Any,
     features_module: Any,
+    focal_team: str | None = None,
 ) -> tuple[list[Example], Counter[str]]:
     examples: list[Example] = []
     total: Counter[str] = Counter()
     for path in paths:
-        decisions, counts = replay_decisions(path)
+        decisions, counts = replay_decisions(path, focal_team=focal_team)
         total.update(counts)
         belief = belief_class(deck, opponent_deck_priors=deck_library)
         for decision in decisions:
@@ -522,7 +541,10 @@ def train(args: argparse.Namespace) -> dict[str, Any]:
     )
     replay_paths = [
         path
-        for path in sorted(args.replays.resolve().glob("episode_*.json"))
+        for path in sorted(
+            set(args.replays.resolve().glob("episode_*.json"))
+            | set(args.replays.resolve().glob("episode-*-replay.json"))
+        )
         if matches_family(path, args.opponent_family)
         and matches_seat_role(path, args.seat_role)
     ]
@@ -565,7 +587,7 @@ def train(args: argparse.Namespace) -> dict[str, Any]:
     extraction: dict[str, dict[str, int]] = {}
     for split_name, split_paths in splits.items():
         data[split_name], split_counts = load_examples(
-            split_paths, deck, deck_library, Belief, features
+            split_paths, deck, deck_library, Belief, features, args.focal_team
         )
         extraction[split_name] = dict(split_counts)
         if not data[split_name]:
@@ -684,6 +706,7 @@ def train(args: argparse.Namespace) -> dict[str, Any]:
                 if args.frozen_split_summary
                 else None
             ),
+            "focal_team": args.focal_team,
             "deck_card_count": len(deck),
         },
         "alignment": "action paired with same seat's previous observation",
