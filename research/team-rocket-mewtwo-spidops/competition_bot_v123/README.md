@@ -46,3 +46,8 @@ to 61.47%. This is behavioral-imitation evidence, not an Elo measurement.
 All four preregistered official-engine panels passed, and the extracted archive
 completed two terminal smoke games. Internal arena acceptance is execution
 evidence only; no direct Kaggle submission or verified 1000-Elo claim is made.
+
+After pickup, the first arena snapshot was 3-25 at rating 206.4. This adverse
+external result rejects Kaggle promotion and is preserved specifically because
+it contradicts the local admission evidence. No post-hoc retuning or follow-up
+candidate was run.

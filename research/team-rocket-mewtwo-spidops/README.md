@@ -15,6 +15,10 @@ V123 combines an admitted neural behavior clone with the live deterministic
 Lucario baseline on low-confidence decisions. It was accepted by the internal
 arena on 2026-08-08; no direct Kaggle submission was made.
 
+Its first arena snapshot was only 3-25 at rating 206.4. That adverse external
+result overrides the favorable local admission cells for promotion purposes:
+V123 is archived research code and must not be promoted to Kaggle.
+
 No claim of superhuman strength, 1000 Elo, public-leader equivalence,
 exploitability bounds, or equilibrium convergence is made. Small local panels
 and initial arena snapshots are admission/health evidence, not mature strength

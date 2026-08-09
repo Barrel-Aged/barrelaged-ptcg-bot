@@ -75,8 +75,15 @@ side-swapped official-engine panels were 7-5 versus V122, 11-1 versus V121,
 The extracted archive completed two terminal smoke games. These results admit
 the candidate to the arena; they do not verify a 1000-Elo Kaggle bot.
 
+The first external arena snapshot then landed at 3-25, rating 206.4. This
+severe adverse signal rejects Kaggle promotion and shows that the favorable
+local imitation/panel gates did not generalize to the arena distribution. The
+snapshot is not a stable strength estimate, but no additional games are needed
+to reject promotion conservatively.
+
 Development is paused after this single final iteration. Promotion to Kaggle,
-if desired after sufficient arena evidence, is a manual user action.
+is not recommended for V123. No rescue iteration, threshold retuning, direct
+Kaggle submission, or further monitoring was started.
 
 ## GitHub publication
 

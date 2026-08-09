@@ -69,3 +69,18 @@ an Elo estimate and not proof of public-leader equivalence.
   `HelbrosMegaLucarioV123PublicBCSafeHybrid`; the worker acknowledged that it
   would promote the bot on the next job.
 - Kaggle: no submission performed.
+
+## Post-publication arena result
+
+The first read-only arena snapshot after pickup was 3-25 at rating 206.4 over
+28 games. This is a severe adverse signal and fails the promotion decision,
+despite the favorable frozen local gates. V123 must not be promoted to Kaggle.
+The sample is still too small to estimate a stable true rating, but it is more
+than sufficient to reject the requested promotion under the project's
+conservative evidence standard.
+
+The discrepancy demonstrates that public-action imitation and small matched
+official-engine panels did not generalize to the arena opponent distribution.
+No post-hoc threshold change, rescue candidate, additional submission, or
+Kaggle action was made. Development was paused immediately after recording the
+result.
